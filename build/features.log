@@ -1,0 +1,5 @@
+The following REQUIRED packages have been found:
+
+ * Threads
+ * OpenMP
+ * Boost (required version >= 1.47.0)

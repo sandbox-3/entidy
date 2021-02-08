@@ -1,0 +1,31 @@
+[
+{
+  "directory": "/media/memento/HDD/development/VSC++/entidy/build",
+  "command": "/usr/bin/c++   -I../include   -fopenmp -g   -std=c++17 -o CMakeFiles/entidy_examples.dir/examples/main.cpp.o -c /media/memento/HDD/development/VSC++/entidy/examples/main.cpp",
+  "file": "/media/memento/HDD/development/VSC++/entidy/examples/main.cpp"
+},
+
+{
+  "directory": "/media/memento/HDD/development/VSC++/entidy/build",
+  "command": "/usr/bin/c++   -I../include   -fopenmp -g   -std=c++17 -o CMakeFiles/entidy_benchmark.dir/benchmark/main.cpp.o -c /media/memento/HDD/development/VSC++/entidy/benchmark/main.cpp",
+  "file": "/media/memento/HDD/development/VSC++/entidy/benchmark/main.cpp"
+},
+
+{
+  "directory": "/media/memento/HDD/development/VSC++/entidy/build",
+  "command": "/usr/bin/c++   -I../include   -fopenmp -g   -std=c++17 -o CMakeFiles/Entidy.dir/src/Entity.cpp.o -c /media/memento/HDD/development/VSC++/entidy/src/Entity.cpp",
+  "file": "/media/memento/HDD/development/VSC++/entidy/src/Entity.cpp"
+},
+
+{
+  "directory": "/media/memento/HDD/development/VSC++/entidy/build",
+  "command": "/usr/bin/c++   -I../include   -fopenmp -g   -std=c++17 -o CMakeFiles/Entidy.dir/src/Query.cpp.o -c /media/memento/HDD/development/VSC++/entidy/src/Query.cpp",
+  "file": "/media/memento/HDD/development/VSC++/entidy/src/Query.cpp"
+},
+
+{
+  "directory": "/media/memento/HDD/development/VSC++/entidy/build",
+  "command": "/usr/bin/c++   -I../include   -fopenmp -g   -std=c++17 -o CMakeFiles/Entidy.dir/src/Registry.cpp.o -c /media/memento/HDD/development/VSC++/entidy/src/Registry.cpp",
+  "file": "/media/memento/HDD/development/VSC++/entidy/src/Registry.cpp"
+}
+]

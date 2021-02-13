@@ -14,8 +14,14 @@
 # EXTERNAL cache entries
 ########################
 
+//Build the testing tree.
+BUILD_TESTING:BOOL=ON
+
 //Build the tests
 BUILD_TESTS:BOOL=OFF
+
+//Path to a program.
+BZRCOMMAND:FILEPATH=BZRCOMMAND-NOTFOUND
 
 //Boost date_time library (debug)
 Boost_DATE_TIME_LIBRARY_DEBUG:FILEPATH=/usr/lib/x86_64-linux-gnu/libboost_date_time.a
@@ -87,6 +93,32 @@ CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 
 //Flags used by the CXX compiler during RELWITHDEBINFO builds.
 CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+
+//C compiler
+CMAKE_C_COMPILER:FILEPATH=/usr/bin/cc
+
+//A wrapper around 'ar' adding the appropriate '--plugin' option
+// for the GCC compiler
+CMAKE_C_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-8
+
+//A wrapper around 'ranlib' adding the appropriate '--plugin' option
+// for the GCC compiler
+CMAKE_C_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-8
+
+//Flags used by the C compiler during all build types.
+CMAKE_C_FLAGS:STRING=
+
+//Flags used by the C compiler during DEBUG builds.
+CMAKE_C_FLAGS_DEBUG:STRING=-g
+
+//Flags used by the C compiler during MINSIZEREL builds.
+CMAKE_C_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
+
+//Flags used by the C compiler during RELEASE builds.
+CMAKE_C_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+
+//Flags used by the C compiler during RELWITHDEBINFO builds.
+CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
 //Path to a program.
 CMAKE_DLLTOOL:FILEPATH=CMAKE_DLLTOOL-NOTFOUND
@@ -266,6 +298,61 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Path to the coverage program that CTest uses for performing coverage
+// inspection
+COVERAGE_COMMAND:FILEPATH=/usr/bin/gcov
+
+//Extra command line flags to pass to the coverage tool
+COVERAGE_EXTRA_FLAGS:STRING=-l
+
+//Enable to build Debian packages
+CPACK_BINARY_DEB:BOOL=OFF
+
+//Enable to build FreeBSD packages
+CPACK_BINARY_FREEBSD:BOOL=OFF
+
+//Enable to build IFW packages
+CPACK_BINARY_IFW:BOOL=OFF
+
+//Enable to build NSIS packages
+CPACK_BINARY_NSIS:BOOL=OFF
+
+//Enable to build RPM packages
+CPACK_BINARY_RPM:BOOL=OFF
+
+//Enable to build STGZ packages
+CPACK_BINARY_STGZ:BOOL=ON
+
+//Enable to build TBZ2 packages
+CPACK_BINARY_TBZ2:BOOL=OFF
+
+//Enable to build TGZ packages
+CPACK_BINARY_TGZ:BOOL=ON
+
+//Enable to build TXZ packages
+CPACK_BINARY_TXZ:BOOL=OFF
+
+//Enable to build TZ packages
+CPACK_BINARY_TZ:BOOL=ON
+
+//How many times to retry timed-out CTest submissions.
+CTEST_SUBMIT_RETRY_COUNT:STRING=3
+
+//How long to wait between timed-out CTest submissions.
+CTEST_SUBMIT_RETRY_DELAY:STRING=5
+
+//Path to a program.
+CVSCOMMAND:FILEPATH=CVSCOMMAND-NOTFOUND
+
+//Options passed to the cvs update command.
+CVS_UPDATE_OPTIONS:STRING=-d -A -P
+
+//Maximum time allowed before CTest will kill the test.
+DART_TESTING_TIMEOUT:STRING=1500
+
+//If OFF, disable unit tests altogether
+ENABLE_ROARING_TESTS:BOOL=ON
+
 //version
 ENTIDY_SANDBOX_VERSION:STRING=0.1
 
@@ -281,6 +368,21 @@ Entidy_BINARY_DIR:STATIC=/media/memento/HDD/development/VSC++/entidy/build
 //Value Computed by CMake
 Entidy_SOURCE_DIR:STATIC=/media/memento/HDD/development/VSC++/entidy
 
+//Path to a program.
+GITCOMMAND:FILEPATH=/usr/bin/git
+
+//Path to a program.
+HGCOMMAND:FILEPATH=HGCOMMAND-NOTFOUND
+
+//Command to build the project
+MAKECOMMAND:STRING=/usr/local/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
+
+//Path to the memory checking command, used for memory error detection.
+MEMORYCHECK_COMMAND:FILEPATH=MEMORYCHECK_COMMAND-NOTFOUND
+
+//File that contains suppressions for the memory checker
+MEMORYCHECK_SUPPRESSIONS_FILE:FILEPATH=
+
 //CXX compiler flags for OpenMP parallelization
 OpenMP_CXX_FLAGS:STRING=-fopenmp
 
@@ -293,14 +395,81 @@ OpenMP_gomp_LIBRARY:FILEPATH=/usr/lib/gcc/x86_64-linux-gnu/8/libgomp.so
 //Path to the pthread library for OpenMP
 OpenMP_pthread_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libpthread.so
 
+//Path to a program.
+P4COMMAND:FILEPATH=P4COMMAND-NOTFOUND
+
 //pkg-config executable
 PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
+
+//If ROARING_DISABLE_NATIVE is OFF, the architecture to optimize
+// for (-march)
+ROARING_ARCH:STRING=native
+
+//Build library C files using C++ compilation
+ROARING_BUILD_C_AS_CPP:BOOL=OFF
+
+//Build test C files using C++ compilation
+ROARING_BUILD_C_TESTS_AS_CPP:BOOL=OFF
+
+//Build library with Link Time Optimization
+ROARING_BUILD_LTO:BOOL=OFF
+
+//Build a static library
+ROARING_BUILD_STATIC:BOOL=OFF
+
+//Forcefully disable AVX even if hardware supports it
+ROARING_DISABLE_AVX:BOOL=OFF
+
+//Forcefully disable -march optimizations
+ROARING_DISABLE_NATIVE:BOOL=OFF
+
+//Forcefully disable NEON even if hardware supports it
+ROARING_DISABLE_NEON:BOOL=OFF
+
+//Forcefully disable x64 optimizations even if hardware supports
+// it (this disables AVX) 
+ROARING_DISABLE_X64:BOOL=OFF
+
+//Enable exception-throwing interface
+ROARING_EXCEPTIONS:BOOL=ON
+
+//Roaring library soversion
+ROARING_LIB_SOVERSION:STRING=0
+
+//Roaring library version
+ROARING_LIB_VERSION:STRING=0.2.66
+
+//Link executables (tests, benchmarks) statically
+ROARING_LINK_STATIC:BOOL=OFF
+
+//Sanitize addresses
+ROARING_SANITIZE:BOOL=OFF
+
+//Value Computed by CMake
+RoaringBitmap_BINARY_DIR:STATIC=/media/memento/HDD/development/VSC++/entidy/build/third_party/CRoaring
+
+//Value Computed by CMake
+RoaringBitmap_SOURCE_DIR:STATIC=/media/memento/HDD/development/VSC++/entidy/third_party/CRoaring
+
+//Name of the computer/site where compile is being run
+SITE:STRING=memento-G5-5587
+
+//Path to the SLURM sbatch executable
+SLURM_SBATCH_COMMAND:FILEPATH=SLURM_SBATCH_COMMAND-NOTFOUND
+
+//Path to the SLURM srun executable
+SLURM_SRUN_COMMAND:FILEPATH=SLURM_SRUN_COMMAND-NOTFOUND
+
+//Path to a program.
+SVNCOMMAND:FILEPATH=SVNCOMMAND-NOTFOUND
 
 
 ########################
 # INTERNAL cache entries
 ########################
 
+//ADVANCED property for variable: BZRCOMMAND
+BZRCOMMAND-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_DATE_TIME_LIBRARY_DEBUG
 Boost_DATE_TIME_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_DATE_TIME_LIBRARY_RELEASE
@@ -341,6 +510,8 @@ CMAKE_CACHE_PATCH_VERSION:INTERNAL=2
 CMAKE_COMMAND:INTERNAL=/usr/local/bin/cmake
 //Path to cpack program executable.
 CMAKE_CPACK_COMMAND:INTERNAL=/usr/local/bin/cpack
+//ADVANCED property for variable: CMAKE_CTEST_COMMAND
+CMAKE_CTEST_COMMAND-ADVANCED:INTERNAL=1
 //Path to ctest program executable.
 CMAKE_CTEST_COMMAND:INTERNAL=/usr/local/bin/ctest
 //ADVANCED property for variable: CMAKE_CXX_COMPILER
@@ -359,6 +530,22 @@ CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
 CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_FLAGS_RELWITHDEBINFO
 CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_COMPILER
+CMAKE_C_COMPILER-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_COMPILER_AR
+CMAKE_C_COMPILER_AR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_COMPILER_RANLIB
+CMAKE_C_COMPILER_RANLIB-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_FLAGS
+CMAKE_C_FLAGS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_FLAGS_DEBUG
+CMAKE_C_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_FLAGS_MINSIZEREL
+CMAKE_C_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_FLAGS_RELEASE
+CMAKE_C_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_FLAGS_RELWITHDEBINFO
+CMAKE_C_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_DLLTOOL
 CMAKE_DLLTOOL-ADVANCED:INTERNAL=1
 //Executable file format
@@ -447,7 +634,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=6
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -490,6 +677,40 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: COVERAGE_COMMAND
+COVERAGE_COMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: COVERAGE_EXTRA_FLAGS
+COVERAGE_EXTRA_FLAGS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_DEB
+CPACK_BINARY_DEB-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_FREEBSD
+CPACK_BINARY_FREEBSD-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_IFW
+CPACK_BINARY_IFW-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_NSIS
+CPACK_BINARY_NSIS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_RPM
+CPACK_BINARY_RPM-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_STGZ
+CPACK_BINARY_STGZ-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_TBZ2
+CPACK_BINARY_TBZ2-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_TGZ
+CPACK_BINARY_TGZ-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_TXZ
+CPACK_BINARY_TXZ-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CPACK_BINARY_TZ
+CPACK_BINARY_TZ-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CTEST_SUBMIT_RETRY_COUNT
+CTEST_SUBMIT_RETRY_COUNT-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CTEST_SUBMIT_RETRY_DELAY
+CTEST_SUBMIT_RETRY_DELAY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CVSCOMMAND
+CVSCOMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CVS_UPDATE_OPTIONS
+CVS_UPDATE_OPTIONS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: DART_TESTING_TIMEOUT
+DART_TESTING_TIMEOUT-ADVANCED:INTERNAL=1
 //Details about finding Boost
 FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/include][cfound components: system filesystem date_time regex ][v1.65.1(1.47.0)]
 //Details about finding OpenMP
@@ -500,6 +721,16 @@ FIND_PACKAGE_MESSAGE_DETAILS_OpenMP_CXX:INTERNAL=[-fopenmp][/usr/lib/gcc/x86_64-
 FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/bin/pkg-config][v0.29.1()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//ADVANCED property for variable: GITCOMMAND
+GITCOMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: HGCOMMAND
+HGCOMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: MAKECOMMAND
+MAKECOMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: MEMORYCHECK_COMMAND
+MEMORYCHECK_COMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: MEMORYCHECK_SUPPRESSIONS_FILE
+MEMORYCHECK_SUPPRESSIONS_FILE-ADVANCED:INTERNAL=1
 //Result of TRY_COMPILE
 OpenMP_COMPILE_RESULT_CXX_fopenmp:INTERNAL=TRUE
 //ADVANCED property for variable: OpenMP_CXX_FLAGS
@@ -514,8 +745,18 @@ OpenMP_SPECTEST_CXX_:INTERNAL=TRUE
 OpenMP_gomp_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OpenMP_pthread_LIBRARY
 OpenMP_pthread_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: P4COMMAND
+P4COMMAND-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PKG_CONFIG_EXECUTABLE
 PKG_CONFIG_EXECUTABLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: SITE
+SITE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: SLURM_SBATCH_COMMAND
+SLURM_SBATCH_COMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: SLURM_SRUN_COMMAND
+SLURM_SRUN_COMMAND-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: SVNCOMMAND
+SVNCOMMAND-ADVANCED:INTERNAL=1
 //Components requested for this build tree.
 _Boost_COMPONENTS_SEARCHED:INTERNAL=date_time;filesystem;regex;system
 //Last used Boost_INCLUDE_DIR value.

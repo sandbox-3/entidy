@@ -36,6 +36,7 @@ include(CMakeToolsHelpers OPTIONAL)
 # include(GetGitRevisionDescription)
 # include(BuildType)
 
+add_subdirectory(third_party/CRoaring EXCLUDE_FROM_ALL)
 
 # ############# #
 # Find packages
@@ -87,38 +88,6 @@ endif()
 # add_subdirectory(third_party/entt)
 
 
-#TARGET LIBRARY
-
-file(GLOB_RECURSE ENTIDY_SRC src/*.cpp)
-
-add_library(${PROJECT_NAME} STATIC)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-target_sources(${PROJECT_NAME} PRIVATE ${ENTIDY_SRC})
-
-target_include_directories(
-  ${PROJECT_NAME}
-  PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  PRIVATE
-)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC
-Threads::Threads
-${Boost_LIBRARIES}
-${OpenMP_CXX_LIBRARIES}
-)
-
-set_target_properties(
-  ${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES
-                             CXX_EXTENSIONS NO)
-
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
-
-
-
-
-
 # TARGET examples
 
 file(GLOB_RECURSE ENTIDY_EXAMPLES
@@ -129,14 +98,15 @@ add_executable(entidy_examples ${ENTIDY_EXAMPLES})
 target_include_directories(entidy_examples
   PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${Boost_INCLUDE_DIRS}
         /usr/local/include
 )
 
 target_link_libraries(entidy_examples
 PUBLIC
-Entidy::Entidy
 Threads::Threads
+roaring
 ${Boost_LIBRARIES}
 ${OpenMP_CXX_LIBRARIES}
 )
@@ -158,14 +128,15 @@ add_executable(entidy_benchmark ${ENTIDY_BENCHMARK})
 target_include_directories(entidy_benchmark
   PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${Boost_INCLUDE_DIRS}
         /usr/local/include
 )
 
 target_link_libraries(entidy_benchmark
 PUBLIC
-Entidy::Entidy
 Threads::Threads
+roaring
 ${Boost_LIBRARIES}
 ${OpenMP_CXX_LIBRARIES}
 )
@@ -175,6 +146,12 @@ ${OpenMP_CXX_LIBRARIES}
   CXX_STANDARD_REQUIRED YES
   CXX_EXTENSIONS NO
   )
+
+if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+  add_compile_definitions(ENTIDY_32_BIT)
+else( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+  add_compile_definitions(ENTIDY_64_BIT)
+endif()
 
 
 #
@@ -201,14 +178,14 @@ endif()
 #   VERSION ${PROJECT_VERSION}
 #   COMPATIBILITY SameMajorVersion)
 
-install(
-  EXPORT ${PROJECT_NAME}-targets
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
-  NAMESPACE ${THIS_PROJECT_NS}::)
-install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-              "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME})
-install(TARGETS ${PROJECT_NAME})
+# install(
+#   EXPORT ${PROJECT_NAME}-targets
+#   DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
+#   NAMESPACE ${THIS_PROJECT_NS}::)
+# install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+#               "${PROJECT_BINARY_DIR}/${PROJer_loop{}ECT_NAME}-config.cmake"
+#         DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME})
+# install(TARGETS ${PROJECT_NAME})
 
 
 #################

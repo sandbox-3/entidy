@@ -1,0 +1,137 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "third_party/CRoaring/benchmarks/frozen_benchmark"
+		}
+	],
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_executable",
+			"add_c_benchmark",
+			"target_link_libraries"
+		],
+		"files" : 
+		[
+			"third_party/CRoaring/tools/cmake/FindCTargets.cmake",
+			"third_party/CRoaring/benchmarks/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 12,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 31,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 32,
+				"parent" : 1
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -std=c11 -fPIC -march=native  -Wall -Wextra -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self   -ggdb  "
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 3,
+					"path" : "/media/memento/HDD/development/VSC++/entidy/third_party/CRoaring/include"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/media/memento/HDD/development/VSC++/entidy/third_party/CRoaring/include/roaring"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "/media/memento/HDD/development/VSC++/entidy/third_party/CRoaring/cpp"
+				}
+			],
+			"language" : "C",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 3,
+			"id" : "roaring::@4c76018fb4bde4bc06a3"
+		}
+	],
+	"id" : "frozen_benchmark::@1238d995bb2863f26210",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-std=c11 -fPIC -march=native  -Wall -Wextra -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self   -ggdb",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "-rdynamic",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "-Wl,-rpath,/media/memento/HDD/development/VSC++/entidy/build",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "../../../libroaring.so.0.2.66",
+				"role" : "libraries"
+			}
+		],
+		"language" : "C"
+	},
+	"name" : "frozen_benchmark",
+	"nameOnDisk" : "frozen_benchmark",
+	"paths" : 
+	{
+		"build" : "third_party/CRoaring/benchmarks",
+		"source" : "third_party/CRoaring/benchmarks"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "third_party/CRoaring/benchmarks/frozen_benchmark.c",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "EXECUTABLE"
+}

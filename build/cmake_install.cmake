@@ -37,38 +37,9 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "/media/memento/HDD/development/VSC++/entidy/build/libEntidy.a")
-endif()
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for each subdirectory.
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/cmake/Entidy/Entidy-targets.cmake")
-    file(DIFFERENT EXPORT_FILE_CHANGED FILES
-         "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/cmake/Entidy/Entidy-targets.cmake"
-         "/media/memento/HDD/development/VSC++/entidy/build/CMakeFiles/Export/share/cmake/Entidy/Entidy-targets.cmake")
-    if(EXPORT_FILE_CHANGED)
-      file(GLOB OLD_CONFIG_FILES "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/cmake/Entidy/Entidy-targets-*.cmake")
-      if(OLD_CONFIG_FILES)
-        message(STATUS "Old export file \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/cmake/Entidy/Entidy-targets.cmake\" will be replaced.  Removing files [${OLD_CONFIG_FILES}].")
-        file(REMOVE ${OLD_CONFIG_FILES})
-      endif()
-    endif()
-  endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/cmake/Entidy" TYPE FILE FILES "/media/memento/HDD/development/VSC++/entidy/build/CMakeFiles/Export/share/cmake/Entidy/Entidy-targets.cmake")
-  if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/cmake/Entidy" TYPE FILE FILES "/media/memento/HDD/development/VSC++/entidy/build/CMakeFiles/Export/share/cmake/Entidy/Entidy-targets-debug.cmake")
-  endif()
-endif()
-
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/cmake/Entidy" TYPE FILE FILES
-    "/media/memento/HDD/development/VSC++/entidy/build/Entidy-config-version.cmake"
-    "/media/memento/HDD/development/VSC++/entidy/build/Entidy-config.cmake"
-    )
-endif()
-
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "/media/memento/HDD/development/VSC++/entidy/build/libEntidy.a")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)

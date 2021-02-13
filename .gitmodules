@@ -1,3 +1,3 @@
-[submodule "third_party/EWAHBoolArray"]
-	path = third_party/EWAHBoolArray
-	url = https://github.com/lemire/EWAHBoolArray.git
+[submodule "third_party/CRoaring"]
+	path = third_party/CRoaring
+	url = https://github.com/RoaringBitmap/CRoaring.git

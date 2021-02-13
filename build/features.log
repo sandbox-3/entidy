@@ -3,3 +3,9 @@ The following REQUIRED packages have been found:
  * Threads
  * OpenMP
  * Boost (required version >= 1.47.0)
+
+-- The following OPTIONAL packages have not been found:
+
+ * CTargets
+ * Options
+ * LTO

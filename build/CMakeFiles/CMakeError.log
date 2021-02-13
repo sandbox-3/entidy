@@ -1,11 +1,11 @@
 Performing C++ SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
 Change Dir: /media/memento/HDD/development/VSC++/entidy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_2112e && [1/2] Building CXX object CMakeFiles/cmTC_2112e.dir/src.cxx.o
-[2/2] Linking CXX executable cmTC_2112e
-FAILED: cmTC_2112e 
-: && /usr/bin/c++  -DCMAKE_HAVE_LIBC_PTHREAD   CMakeFiles/cmTC_2112e.dir/src.cxx.o  -o cmTC_2112e   && :
-CMakeFiles/cmTC_2112e.dir/src.cxx.o: In function `main':
+Run Build Command(s):/usr/bin/ninja cmTC_1580c && [1/2] Building CXX object CMakeFiles/cmTC_1580c.dir/src.cxx.o
+[2/2] Linking CXX executable cmTC_1580c
+FAILED: cmTC_1580c 
+: && /usr/bin/c++  -DCMAKE_HAVE_LIBC_PTHREAD   CMakeFiles/cmTC_1580c.dir/src.cxx.o  -o cmTC_1580c   && :
+CMakeFiles/cmTC_1580c.dir/src.cxx.o: In function `main':
 src.cxx:(.text+0x3e): undefined reference to `pthread_create'
 src.cxx:(.text+0x4a): undefined reference to `pthread_detach'
 src.cxx:(.text+0x56): undefined reference to `pthread_cancel'
@@ -39,10 +39,10 @@ int main(void)
 Determining if the function pthread_create exists in the pthreads failed with the following output:
 Change Dir: /media/memento/HDD/development/VSC++/entidy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_530e8 && [1/2] Building CXX object CMakeFiles/cmTC_530e8.dir/CheckFunctionExists.cxx.o
-[2/2] Linking CXX executable cmTC_530e8
-FAILED: cmTC_530e8 
-: && /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=pthread_create   CMakeFiles/cmTC_530e8.dir/CheckFunctionExists.cxx.o  -o cmTC_530e8  -lpthreads && :
+Run Build Command(s):/usr/bin/ninja cmTC_3bcee && [1/2] Building CXX object CMakeFiles/cmTC_3bcee.dir/CheckFunctionExists.cxx.o
+[2/2] Linking CXX executable cmTC_3bcee
+FAILED: cmTC_3bcee 
+: && /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=pthread_create   CMakeFiles/cmTC_3bcee.dir/CheckFunctionExists.cxx.o  -o cmTC_3bcee  -lpthreads && :
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
 ninja: build stopped: subcommand failed.

@@ -62,14 +62,6 @@ find_package(Boost ${BOOST_MIN_VERSION}
              COMPONENTS
              system filesystem date_time regex REQUIRED)
 
-
-include(FindPkgConfig)
-if(NOT PKG_CONFIG_FOUND)
-  message(FATAL_ERROR "pkg-config not found!" )
-endif()
-
-
-
 # ########################### #
 # setup generated information
 # ########################### #

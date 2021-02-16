@@ -1,184 +1,218 @@
 #pragma once
 
-#include <memory>
+#include <assert.h>
+#include <deque>
+#include <functional>
+#include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <deque>
-#include <iostream>
-#include <assert.h>
-#include <functional>
 
 namespace entidy
 {
-    using namespace std;
+using namespace std;
 
-    template <typename Type>
-    class MemoryBlock
-    {
-    protected:
-        std::aligned_storage_t<sizeof(Type), alignof(Type)> *data;
-        vector<Type *> pool;
-        size_t item_capacity;
-        Type *pointer;
+template <typename Type>
+class MemoryPool;
 
-        MemoryBlock(size_t item_capacity)
-        {
-            data = new std::aligned_storage_t<sizeof(Type), alignof(Type)>[item_capacity];
-            pointer = reinterpret_cast<Type *>(data);
+template <typename Type>
+class MemoryBlock
+{
+protected:
+	std::aligned_storage_t<sizeof(Type), alignof(Type)>* data;
+	vector<Type*> pool;
+	size_t item_capacity;
+	Type* pointer;
 
-            for (size_t i = 0; i < item_capacity; i++)
-            {
-                Type *ptr = pointer + i;
-                pool.push_back(ptr);
-            }
-        }
+	MemoryBlock(size_t item_capacity)
+	{
+		data = new std::aligned_storage_t<sizeof(Type), alignof(Type)>[item_capacity];
+		pointer = reinterpret_cast<Type*>(data);
 
-    public:
-        ~MemoryBlock()
-        {
-            delete[] data;
-        }
+		for(size_t i = 0; i < item_capacity; i++)
+		{
+			Type* ptr = pointer + i;
+			pool.push_back(ptr);
+		}
+	}
 
-        size_t Capacity()
-        {
-            return item_capacity;
-        }
+public:
+	~MemoryBlock()
+	{
+		delete[] data;
+	}
 
-        size_t Available()
-        {
-            return pool.size();
-        }
+	size_t Capacity()
+	{
+		return item_capacity;
+	}
 
-        void Push(Type *ptr)
-        {
-            ptr->~Type();
-            pool.push_back(ptr);
-        }
+	size_t Available()
+	{
+		return pool.size();
+	}
 
-        Type *Pop()
-        {
-            Type *back = pool.back();
-            pool.pop_back();
-            return back;
-        }
+	void Push(Type* ptr)
+	{
+		ptr->~Type();
+		pool.push_back(ptr);
+	}
 
-        Type *Pointer()
-        {
-            return pointer;
-        }
-    };
+	Type* Pop()
+	{
+		Type* back = pool.back();
+		pool.pop_back();
+		return back;
+	}
 
-    template <typename Type>
-    class MemoryPool
-    {
-    protected:
-        deque<shared_ptr<MemoryBlock<Type>>> pool;
-        size_t item_capacity;
+	Type* Pointer()
+	{
+		return pointer;
+	}
 
-        MemoryPool(size_t block_size)
-        {
-            this->item_capacity = max((block_size / sizeof(Type)), size_t(2));
-        }
+	friend MemoryPool<Type>;
+};
 
-    public:
-        ~MemoryPool()
-        {
-        }
+class MemoryManagerImpl;
 
-        void Push(Type *ptr)
-        {
-            bool prune = false;
-            auto it = pool.begin();
-            while (it != pool.end())
-            {
-                shared_ptr<MemoryBlock<Type>> block = *it;
-                Type *range_start = block->Pointer();
-                Type *range_end = block->Pointer() + item_capacity;
+template <typename Type>
+class MemoryPool
+{
+protected:
+	deque<shared_ptr<MemoryBlock<Type>>> pool;
+	size_t item_capacity;
 
-                if (ptr > range_start && ptr < range_end)
-                {
-                    block->Push(ptr);
-                    ++it;
-                    continue;
-                }
+	MemoryPool(size_t item_capacity)
+	{
+		this->item_capacity = item_capacity;
+	}
 
-                if (block->Available() == block->Capacity())
-                {
-                    if (prune)
-                        it = pool.erase(it);
-                    prune = true;
-                }
-                ++it;
-            }
-        }
+public:
+	~MemoryPool() { }
 
-        Type *Pop()
-        {
-            for (auto &block : pool)
-            {
-                if (block->Available() > 0)
-                    return block->Pop();
-            }
+	void Push(Type* ptr)
+	{
+		bool prune = false;
+		auto it = pool.begin();
+		while(it != pool.end())
+		{
+			shared_ptr<MemoryBlock<Type>> block = *it;
+			Type* range_start = block->Pointer();
+			Type* range_end = block->Pointer() + item_capacity;
 
-            shared_ptr<MemoryBlock<Type>> new_block = shared_ptr<MemoryBlock<Type>>(new MemoryBlock<Type>(item_capacity));
-            pool.push_back(new_block);
-            return new_block->Pop();
-        }
-    };
+			if(ptr > range_start && ptr < range_end)
+			{
+				block->Push(ptr);
+				++it;
+				continue;
+			}
 
-    class MemoryManager
-    {
-    protected:
-        struct ManagedPool
-        {
-            shared_ptr<void> pool;
-            std::function<void(const string &key, void *ptr)> push;
-        };
-        unordered_map<string, ManagedPool> pools;
+			if(block->Available() == block->Capacity())
+			{
+				if(prune)
+					it = pool.erase(it);
+				prune = true;
+			}
+			++it;
+		}
+	}
 
-    public:
-        MemoryManager()
-        {
-        }
+	Type* Pop()
+	{
+		for(auto& block : pool)
+		{
+			if(block->Available() > 0)
+				return block->Pop();
+		}
 
-        template <typename Type>
-        void Create(const string &key, size_t block_capacity = 64000)
-        {
-            assert(pools.find(key) == pools.end());
+		shared_ptr<MemoryBlock<Type>> new_block =
+			shared_ptr<MemoryBlock<Type>>(new MemoryBlock<Type>(item_capacity));
+		pool.push_back(new_block);
+		return new_block->Pop();
+	}
 
-            size_t size = sizeof(Type);
+	friend MemoryManagerImpl;
+};
 
-            auto managed_pool = ManagedPool{};
-            managed_pool.pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
-            managed_pool.push = [&](const string &key, void *ptr) {
-                assert(pools.find(key) != pools.end());
+class MemoryManagerImpl;
+using MemoryManager = shared_ptr<MemoryManagerImpl>;
 
-                MemoryPool<Type> *mp = static_cast<MemoryPool<Type> *>(pools[key].pool.get());
-                mp->Push(static_cast<Type *>(ptr));
-            };
+class MemoryManagerImpl
+{
+protected:
+	struct ManagedPool
+	{
+		shared_ptr<void> pool;
+		std::function<void(const string& key, intptr_t ptr)> push;
+		size_t counter;
+	};
+	unordered_map<string, ManagedPool> pools;
+	unordered_map<string, size_t> hints;
 
-            pools.emplace(key, managed_pool);
-        }
+	template <typename Type>
+	void Create(const string& key, size_t size_hint)
+	{
+		assert(pools.find(key) == pools.end());
 
-        void Push(const string &key, void *ptr)
-        {
-            pools[key].push(key, ptr);
-        }
+		size_t maxc = size_t(65536) / sizeof(Type);
+		size_t defc = size_hint == 0 ? size_t(32768) / sizeof(Type) : defc;
 
-        template <typename Type>
-        Type *Pop(const string &key)
-        {
-            if (pools.find(key) == pools.end())
-                Create<Type>(key);
+		size_t block_capacity = max(size_t(1), min(defc, maxc));
 
-            MemoryPool<Type> *mp = static_cast<MemoryPool<Type> *>(pools[key].pool.get());
-            return mp->Pop();
-        }
+		auto managed_pool = ManagedPool{};
+		managed_pool.pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
+		managed_pool.push = [&](const string& key, intptr_t ptr) {
+			assert(pools.find(key) != pools.end());
+			MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(pools[key].pool.get());
+			mp->Push((Type*)(ptr));
+		};
 
-        bool HasKey(const string &key)
-        {
-            return pools.find(key) != pools.end();
-        }
-    };
+		pools.emplace(key, managed_pool);
+	}
+
+public:
+	MemoryManagerImpl() { }
+
+	void Push(const string& key, intptr_t ptr)
+	{
+		auto it = pools.find(key);
+		assert(it != pools.end());
+
+		it->second.push(key, ptr);
+		--it->second.counter;
+	}
+
+	template <typename Type>
+	Type* Pop(const string& key)
+	{
+		auto it = pools.find(key);
+		if(it == pools.end())
+			Create<Type>(key, hints[key]);
+
+		it = pools.find(key);
+
+		++it->second.counter;
+		MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(it->second.pool.get());
+		return mp->Pop();
+	}
+
+	void CleanUp()
+	{
+		auto it = pools.begin();
+		while(it != pools.end())
+			if(it->second.counter == 0)
+				it = pools.erase(it);
+	}
+
+	void SizeHint(const string& key, size_t hint)
+	{
+		hints.emplace(key, hint);
+	}
+
+	bool HasKey(const string& key)
+	{
+		return pools.find(key) != pools.end();
+	}
+};
 } // namespace entidy

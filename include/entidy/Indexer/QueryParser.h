@@ -1,29 +1,19 @@
 #pragma once
-#include <functional>
+#include <deque>
+#include <vector>
+#include <string>
+
+#include <entidy/Exception.h>
 
 namespace entidy
 {
     using namespace std;
-#include <exception>
-
-    class QueryParserException : virtual public std::exception
-    {
-    protected:
-        std::string error_message;
-
-    public:
-        explicit QueryParserException(const std::string &msg) : error_message(msg) {}
-        virtual ~QueryParserException() throw() {}
-        virtual const char *what() const throw()
-        {
-            return error_message.c_str();
-        }
-    };
 
     template <typename Type>
     class QueryParserAdapter
     {
     public:
+        virtual ~QueryParserAdapter() {}
         virtual Type Evaluate(const string &token) = 0;
         virtual Type And(const Type &lhs, const Type &rhs) = 0;
         virtual Type Or(const Type &lhs, const Type &rhs) = 0;
@@ -114,6 +104,8 @@ namespace entidy
 
             if (op == TokenType::Not)
                 return adapter->Not(children[0].Evaluate(adapter));
+            
+            throw EntidyException("Bad Token: " + key);
         }
     };
 
@@ -257,7 +249,7 @@ namespace entidy
         {
             auto tokens = Tokenize(query);
             if (!BuildTree(tokens))
-                throw QueryParserException("Bad Query: " + query);
+                throw EntidyException("Bad Query: " + query);
 
             return tokens.front().Evaluate(adapter);
         }

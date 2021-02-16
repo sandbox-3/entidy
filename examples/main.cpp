@@ -5,163 +5,184 @@
 #include <roaring64map.hh>
 
 #include <entidy/Entidy.h>
-#include <entidy/MemoryManager.h>
 #include <entidy/Indexer/QueryParser.h>
+#include <entidy/MemoryManager.h>
+#include <entidy/Query.h>
 
 using namespace std;
 using namespace entidy;
 
+struct Vec3
+{
+	Vec3(int x, int y, int z)
+	{
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+
+	float x;
+	float y;
+	float z;
+
+	void print()
+	{
+		cout << "x=" << x << endl;
+		cout << "y=" << y << endl;
+		cout << "z=" << z << endl;
+	}
+};
+
 struct Position
 {
-    Position()
-    {
-    }
-
-    Position(int x, int y, int z)
-    {
-    }
-
-    int x;
-    int y;
-    int z;
+	int x;
+	int y;
+	int z;
 };
 
 struct Velocity
 {
-    int dx;
-    int dy;
-    int dz;
+	int dx;
+	int dy;
+	int dz;
 
-    float speed;
+	float speed;
 };
 
 class QPAdapter : public QueryParserAdapter<int>
 {
 public:
-    virtual int Evaluate(const string &token)
-    {
-        return stoi(token);
-    }
+	virtual int Evaluate(const string& token)
+	{
+		return stoi(token);
+	}
 
-    virtual int And(const int &lhs, const int &rhs)
-    {
-        return lhs * rhs;
-    }
+	virtual int And(const int& lhs, const int& rhs)
+	{
+		return lhs * rhs;
+	}
 
-    virtual int Or(const int &lhs, const int &rhs)
-    {
-        return lhs + rhs;
-    }
+	virtual int Or(const int& lhs, const int& rhs)
+	{
+		return lhs + rhs;
+	}
 
-    virtual int Not(const int &rhs)
-    {
-        return -rhs;
-    }
+	virtual int Not(const int& rhs)
+	{
+		return -rhs;
+	}
 };
-
-void iter_loop(Entity e, const Position * const pos, Velocity* vel)
-{
-    //cout << pos->x << " " << vel.dx << "\n";
-}
 
 int main()
 {
-    // using namespace roaring;
-    // Roaring64Map t = Roaring64Map::bitmapOf(6, 10000, 3, 2, 1, 6, 5);
-    // for (Roaring64Map::const_iterator i = t.begin(); i != t.end(); i++)
-    // {
-    //     cout << *i << endl;
-    // }
+	Registry registry = RegistryFactory::New();
 
-    // Entity e = registry.NewEntity();
-    // registry.NewComponent(e, "pos", Vec3(3,5,6));
-    // registry.NewComponent(e, "vel", Vec3(3,5,6));
-    // auto it = registry.Select("pos", "vel").Having("pos & !(vel & stationary) | flying")
-    // it.Each([](Entity e, Vec3 pos, Vec3 vel)
-    // {
-    //     cout << pos.x << " " << vel.dx << "\n";
-    // });
+	Entity e1 = registry->Create();
+	auto e1pos = registry->Emplace<Vec3>(e1, "position", 1, 2, 3);
+	auto e1vel = registry->Emplace<Vec3>(e1, "velocity", Vec3(4, 5, 6));
 
-    shared_ptr<QueryParserAdapter<int>> adapter = make_shared<QPAdapter>();
-    QueryParser parser(adapter);
+	e1pos->print();
+	e1vel->print();
 
-    // 1 * -(2 + 5) * 66 + 32 * -4 = -590
-    int out = parser.Parse("(1 & !(2 | (5&2)) & 66 | 32 & ! 4)");
-    cout << out << endl;
+	registry->Erase(e1, "velocity");
+	registry->Erase(e1, "position");
+	//registry->Erase(e1);
 
-    return 0;
+	// auto query = registry.Select("pos", "vel");
+	// auto it1 = query.Filter("pos & !(vel & stationary) | flying");
+	// auto it2 = query.Filter();
 
-    Registry r = RegistryFactory::NewRegistry();
-    // auto qq = Query("test").And("test2").Not("test3");
+	// auto it = registry.Select("pos", "vel").Filter();
 
-    auto a = r->Fetch("test", "test2");
+	// it.Each([](Entity e, Vec3 pos, Vec3 vel)
+	// {
+	//     cout << pos.x << " " << vel.dx << "\n";
+	// });
 
-    //a.Each(&iter_loop);
-    a.Each([](Entity e, const Position &pos, Velocity vel)
-    {
-        cout << pos.x << " " << vel.dx << "\n";
-    });
+	// registry->Erase(e, "pos", "vel");
+	// registry->Erase(e);
 
-    // MemoryManager memoryManager;
+	//Query q ("a", "b", "c");
 
-    // memoryManager.Create<Position>("pos");
+	// shared_ptr<QueryParserAdapter<int>> adapter = make_shared<QPAdapter>();
+	// QueryParser parser(adapter);
 
-    // Position* pos = memoryManager.Pop<Position>("pos");
-    // memoryManager.Push("pos", pos);
+	// // 1 * -(2 + 5) * 66 + 32 * -4 = -590
+	// int out = parser.Parse("(1 & !(2 | (5&2)) & 66 | 32 & ! 4)");
+	// cout << out << endl;
 
-    // pos->x = 4;
-    // pos->y = 6;
-    // pos->z = 11;
+	// return 0;
 
-    // new (component) ComponentImpl (0, pos);
+	// Registry r = RegistryFactory::New();
+	// auto qq = Query("test").And("test2").Not("test3");
 
-    // cout << component->parent << endl;
-    // Position *pp = ((Position*)component->data);
-    // cout << pp->x << endl;
-    // cout << pp->y << endl;
-    // cout << pp->z << endl;
-    // cout << component << endl;
-    // cout << component->data << endl;
+	//auto a = r->Fetch("test", "test2");
 
-    // Position* pos1 = memoryManager.Pop<Position>("pos");
-    // Position* pos2 = memoryManager.Pop<Position>("pos");
+	// a.Each([](Entity e, const Position &pos, Velocity vel)
+	// {
+	//     cout << pos.x << " " << vel.dx << "\n";
+	// });
 
-    // memoryManager.Push<Position>("pos", pos);
-    // memoryManager.Push<Position>("pos", pos1);
-    // memoryManager.Push<Position>("pos", pos2);
+	// MemoryManager memoryManager;
 
-    // MemoryManager memoryManager(0, 10);
-    // memoryManager.CreatePool<Position>("pos");
-    // memoryManager.CreatePool<Velocity>("vel");
+	// memoryManager.Create<Position>("pos");
 
-    // Component c1 = memoryManager.Pop("pos");
-    // Position p = c1->Data<Position>();
-    // cout << p.x << endl;
+	// Position* pos = memoryManager.Pop<Position>("pos");
+	// memoryManager.Push("pos", pos);
 
-    // c1->Data<Position>().x = 5;
-    // c1->Data<Position>().y = 6;
-    // c1->Data<Position>().z = 7;
-    // cout << c1->Data<Position>().x << endl;
-    // c1->Clear();
-    // cout << c1->Data<Position>().x << endl;
+	// pos->x = 4;
+	// pos->y = 6;
+	// pos->z = 11;
 
-    // cout << p.x << endl;
+	// new (component) ComponentImpl (0, pos);
 
-    // Component c2 = memoryManager.Pop("pos");
-    // cout << c2->Data<Position>().x << endl;
-    // c2->Data<Position>().y = 1;
-    // c2->Data<Position>().z = 2;
+	// cout << component->parent << endl;
+	// Position *pp = ((Position*)component->data);
+	// cout << pp->x << endl;
+	// cout << pp->y << endl;
+	// cout << pp->z << endl;
+	// cout << component << endl;
+	// cout << component->data << endl;
 
-    // memoryManager.Push("pos", c1);
-    // memoryManager.Push("pos", c2);
+	// Position* pos1 = memoryManager.Pop<Position>("pos");
+	// Position* pos2 = memoryManager.Pop<Position>("pos");
 
-    // Component c3 = memoryManager.Pop("vel");
-    // c3->Data<Velocity>().dx = 5;
-    // c3->Data<Velocity>().dy = 6;
-    // c3->Data<Velocity>().dz = 7;
-    // c3->Data<Velocity>().speed = 8;
+	// memoryManager.Push<Position>("pos", pos);
+	// memoryManager.Push<Position>("pos", pos1);
+	// memoryManager.Push<Position>("pos", pos2);
 
-    // memoryManager.Push("vel", c3);
+	// MemoryManager memoryManager(0, 10);
+	// memoryManager.CreatePool<Position>("pos");
+	// memoryManager.CreatePool<Velocity>("vel");
 
-    return 0;
+	// Component c1 = memoryManager.Pop("pos");
+	// Position p = c1->Data<Position>();
+	// cout << p.x << endl;
+
+	// c1->Data<Position>().x = 5;
+	// c1->Data<Position>().y = 6;
+	// c1->Data<Position>().z = 7;
+	// cout << c1->Data<Position>().x << endl;
+	// c1->Clear();
+	// cout << c1->Data<Position>().x << endl;
+
+	// cout << p.x << endl;
+
+	// Component c2 = memoryManager.Pop("pos");
+	// cout << c2->Data<Position>().x << endl;
+	// c2->Data<Position>().y = 1;
+	// c2->Data<Position>().z = 2;
+
+	// memoryManager.Push("pos", c1);
+	// memoryManager.Push("pos", c2);
+
+	// Component c3 = memoryManager.Pop("vel");
+	// c3->Data<Velocity>().dx = 5;
+	// c3->Data<Velocity>().dy = 6;
+	// c3->Data<Velocity>().dz = 7;
+	// c3->Data<Velocity>().speed = 8;
+
+	// memoryManager.Push("vel", c3);
+
+	return 0;
 }

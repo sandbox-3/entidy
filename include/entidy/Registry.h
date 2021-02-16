@@ -8,9 +8,9 @@
 
 #include <entidy/Entity.h>
 #include <entidy/Exception.h>
-#include <entidy/Indexer/Indexer.h>
-#include <entidy/Indexer/Iterator.h>
 #include <entidy/MemoryManager.h>
+#include <entidy/Indexer.h>
+#include <entidy/Iterator.h>
 #include <entidy/Query.h>
 
 namespace entidy
@@ -64,7 +64,7 @@ public:
 		Type* c = memory_manager->Pop<Type>(key);
 		memcpy(c, &component, sizeof(Type));
 
-		indexer->AddComponent(entity, key, c);
+		indexer->AddComponent(entity, key, (intptr_t)c);
 		return c;
 	}
 
@@ -101,6 +101,15 @@ public:
 	{
 		return Query(indexer, args...);
 	}
+
+	template <typename Type>
+    Type * Component (Entity entity, const string &key)
+    {
+        if(!indexer->HasComponent(entity, key))
+			throw EntidyException("Entity: " + to_string(entity) + " does not have component: " + key);
+
+        return (Type*)indexer->GetComponent(entity, key);
+    }
 
 	void SizeHint(const string& key, size_t size_hint)
 	{

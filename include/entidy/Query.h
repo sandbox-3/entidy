@@ -7,8 +7,9 @@
 #include <unordered_map>
 
 #include <entidy/Entity.h>
-#include <entidy/Indexer/Indexer.h>
-#include <entidy/Indexer/Iterator.h>
+#include <entidy/QueryParser.h>
+#include <entidy/Indexer.h>
+#include <entidy/Iterator.h>
 #include <entidy/Registry.h>
 
 namespace entidy

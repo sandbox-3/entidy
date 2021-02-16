@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <vector>
 
-#include <entidy/Indexer/Indexer.h>
+#include <entidy/Indexer.h>
 
 namespace entidy
 {

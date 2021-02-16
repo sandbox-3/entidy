@@ -249,7 +249,7 @@ namespace entidy
         {
             auto tokens = Tokenize(query);
             if (!BuildTree(tokens))
-                throw EntidyException("Bad Query: " + query);
+                throw EntidyException("Bad Query; Check syntax: " + query);
 
             return tokens.front().Evaluate(adapter);
         }

@@ -5,7 +5,7 @@
 #include <roaring64map.hh>
 
 #include <entidy/Entidy.h>
-#include <entidy/Indexer/QueryParser.h>
+#include <entidy/QueryParser.h>
 #include <entidy/MemoryManager.h>
 #include <entidy/Query.h>
 
@@ -78,15 +78,25 @@ int main()
 	Registry registry = RegistryFactory::New();
 
 	Entity e1 = registry->Create();
-	auto e1pos = registry->Emplace<Vec3>(e1, "position", 1, 2, 3);
-	auto e1vel = registry->Emplace<Vec3>(e1, "velocity", Vec3(4, 5, 6));
+    cout << e1 << endl;
+	registry->Emplace<Vec3>(e1, "position", 1, 2, 3);
 
-	e1pos->print();
-	e1vel->print();
+	Entity e2 = registry->Create();
+    cout << e2 << endl;
+	registry->Emplace(e2, "position", Vec3(7, 8, 9));
+	registry->Emplace(e2, "velocity", Vec3(4, 5, 6));
 
-	registry->Erase(e1, "velocity");
-	registry->Erase(e1, "position");
-	//registry->Erase(e1);
+    auto p1 = registry->Component<Vec3>(e1, "position");
+    auto p2 = registry->Component<Vec3>(e2, "velocity");
+
+    p1->print();
+    p2->print();
+
+	registry->Erase(e2, "position");
+	registry->Erase(e1);
+
+	Entity e3 = registry->Create();
+    cout << e3 << endl;
 
 	// auto query = registry.Select("pos", "vel");
 	// auto it1 = query.Filter("pos & !(vel & stationary) | flying");

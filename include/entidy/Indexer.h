@@ -1,20 +1,23 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
-#include <roaring64map.hh>
 
 #include <entidy/Exception.h>
 #include <entidy/Entity.h>
-#include <entidy/Indexer/Iterator.h>
-#include <entidy/Indexer/SparseMap.h>
+#include <entidy/Iterator.h>
+#include <entidy/SparseMap.h>
+#include <entidy/QueryParser.h>
 
 namespace entidy
 {
-using namespace roaring;
 
 #ifdef ENTIDY_32_BIT
+#include <roaring.hh>
+using namespace roaring;
 using BitMap = CRoaring;
 #else
+#include <roaring64map.hh>
+using namespace roaring;
 using BitMap = Roaring64Map;
 #endif
 
@@ -32,8 +35,9 @@ using Registry = shared_ptr<RegistryImpl>;
 class IndexerImpl;
 using Indexer = shared_ptr<IndexerImpl>;
 
-class IndexerImpl : public enable_shared_from_this<IndexerImpl>
+class IndexerImpl : public enable_shared_from_this<IndexerImpl>, QueryParserAdapter<BitMap>
 {
+
 protected:
 	vector<Entity> entity_pool;
 	Entity entityRefCount = 0;
@@ -62,15 +66,16 @@ protected:
 		return c;
 	}
 
-	size_t ComponentIndex(const string& key)
+	size_t ComponentIndex(const string& key, bool auto_create = true)
 	{
-		size_t c;
 		auto it = index.find(key);
 		if(it != index.end())
-			c = it->second;
-		else
-			c = NewComponent(key);
-		return c;
+			return it->second;
+		
+        if(auto_create)
+			return NewComponent(key);
+		
+        throw(EntidyException("Key: " + key + " does not exist"));
 	}
 
 	string ComponentKey(size_t id)
@@ -85,7 +90,9 @@ protected:
 	}
 
 public:
-	IndexerImpl() { }
+	IndexerImpl()
+    {
+    }
 
 	bool HasEntity(Entity e)
 	{
@@ -184,6 +191,34 @@ public:
 
 		return iterator;
 	}
+
+    // Query Parser Adapter functions
+
+	virtual BitMap Evaluate(const string& token) override
+	{
+		size_t id = ComponentIndex(token, false);
+		BitMap map;
+		map.add(id);
+		return map;
+	}
+
+	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override
+	{
+		return lhs & rhs;
+	}
+
+	virtual BitMap Or(const BitMap& lhs, const BitMap& rhs) override
+	{
+		return lhs | rhs;
+	}
+
+	virtual BitMap Not(const BitMap& rhs) override
+	{
+		auto copy = rhs;
+		copy.flip(0, copy.maximum());
+		return copy;
+	}
+
 };
 
 } // namespace entidy

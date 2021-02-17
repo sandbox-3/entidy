@@ -10,14 +10,14 @@ namespace entidy
 using namespace std;
 class IndexerImpl;
 
-class Iterator
+class View
 {
 protected:
 	vector<intptr_t> data;
 	size_t rows;
 	size_t cols;
 
-	Iterator(const vector<intptr_t>& data, size_t rows, size_t cols)
+	View(const vector<intptr_t>& data, size_t rows, size_t cols)
 	{
 		this->data = data;
 		this->rows = rows;

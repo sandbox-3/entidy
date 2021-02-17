@@ -91,7 +91,7 @@ namespace entidy
         }
 
         template <typename Type>
-        Type Evaluate(shared_ptr<QueryParserAdapter<Type>> adapter)
+        Type Evaluate(QueryParserAdapter<Type> * adapter)
         {
             if (op == TokenType::Leaf)
                 return adapter->Evaluate(key);
@@ -113,13 +113,7 @@ namespace entidy
     class QueryParser
     {
     protected:
-        shared_ptr<QueryParserAdapter<Type>> adapter;
-
-    public:
-        QueryParser(shared_ptr<QueryParserAdapter<Type>> adapter)
-        {
-            this->adapter = adapter;
-        }
+        QueryParserAdapter<Type> *adapter;
 
         deque<Token> Tokenize(const string &query)
         {
@@ -243,6 +237,12 @@ namespace entidy
             }
 
             return tokens.size() == 1;
+        }
+
+    public:
+        QueryParser(QueryParserAdapter<Type> * adapter)
+        {
+            this->adapter = adapter;
         }
 
         Type Parse(const string &query)

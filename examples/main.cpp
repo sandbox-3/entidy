@@ -9,6 +9,8 @@
 #include <entidy/MemoryManager.h>
 #include <entidy/Query.h>
 
+#include <entidy/PagedVector.h>
+
 using namespace std;
 using namespace entidy;
 
@@ -75,6 +77,32 @@ public:
 
 int main()
 {
+    MemoryManager memoryManager = make_shared<MemoryManagerImpl>();
+    PagedVector<100> pv(memoryManager);
+
+    pv.Write(299, 4);
+
+    pv.Write(295, 4);
+    pv.Write(293, 4);
+
+    pv.Write(193, 4);
+
+    pv.Write(793, 4);
+    cout << pv.Read(199) << endl;
+
+    //pv[10] = 5;
+    // intptr_t t = pv[10];
+    
+    //cout << pv[10] << endl;
+
+    //pv[123] = 11;
+    //cout << pv[424] << endl;
+
+    //size_t a = pv[10];
+    //cout << a << endl;
+
+    return 0;
+
 	Registry registry = RegistryFactory::New();
 
 	Entity e1 = registry->Create();

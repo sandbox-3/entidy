@@ -18,12 +18,13 @@ public:
 		map.emplace(key, value);
 	}
 
-	vector<Type> Select(const vector<size_t>& keys) const
+    template <typename IterT>
+	vector<Type> Select(intptr_t * buffer, const IterT& begin, const IterT& end) const
 	{
-		vector<Type> out;
-		for(auto& t : keys)
-			out.push_back(map[t]);
-		return out;
+		// vector<Type> out;
+		// for(auto& t : keys)
+		// 	out.push_back(map[t]);
+		// return out;
 	}
 
 	Type Select(size_t key) const

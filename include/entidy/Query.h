@@ -9,7 +9,7 @@
 #include <entidy/Entity.h>
 #include <entidy/QueryParser.h>
 #include <entidy/Indexer.h>
-#include <entidy/Iterator.h>
+#include <entidy/View.h>
 #include <entidy/Registry.h>
 
 namespace entidy
@@ -38,7 +38,7 @@ protected:
 	}
 
 public:
-	Iterator Filter(const string& filter = "")
+	View Filter(const string& filter = "")
 	{
 		return indexer->Fetch(select, filter);
 	}

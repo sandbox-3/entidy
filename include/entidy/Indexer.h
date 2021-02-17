@@ -4,7 +4,7 @@
 
 #include <entidy/Exception.h>
 #include <entidy/Entity.h>
-#include <entidy/Iterator.h>
+#include <entidy/View.h>
 #include <entidy/SparseMap.h>
 #include <entidy/QueryParser.h>
 
@@ -185,10 +185,23 @@ public:
 		}
 	}
 
-	Iterator Fetch(const vector<string>& keys, const string& filter)
+	View Fetch(const vector<string>& keys, const string& filter)
 	{
-		Iterator iterator(vector<intptr_t>(), 0, 0);
+        QueryParser<BitMap> qp(this);
+        BitMap bmp = qp.Parse(filter);
 
+        size_t rows = bmp.cardinality();
+        size_t cols = keys.size() + 1;
+        vector<intptr_t> results(rows * cols);
+
+        for(size_t i = 0; i < keys.size(); i++)
+        {
+            size_t c = ComponentIndex(keys[i], false);
+            //vector<intptr_t> res = maps[c]->components.Select(bmp.begin(), bmp.end());
+
+        }
+
+		View iterator(results, rows, cols);
 		return iterator;
 	}
 

@@ -10,7 +10,7 @@
 #include <entidy/Exception.h>
 #include <entidy/MemoryManager.h>
 #include <entidy/Indexer.h>
-#include <entidy/Iterator.h>
+#include <entidy/View.h>
 #include <entidy/Query.h>
 
 namespace entidy

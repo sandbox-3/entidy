@@ -2,21 +2,21 @@
 #include <unordered_map>
 #include <vector>
 
-#include <entidy/Exception.h>
 #include <entidy/Entity.h>
-#include <entidy/View.h>
-#include <entidy/SparseMap.h>
+#include <entidy/Exception.h>
 #include <entidy/QueryParser.h>
+#include <entidy/SparseMap.h>
+#include <entidy/View.h>
 
 namespace entidy
 {
 
 #ifdef ENTIDY_32_BIT
-#include <roaring.hh>
+#	include <roaring.hh>
 using namespace roaring;
 using BitMap = CRoaring;
 #else
-#include <roaring64map.hh>
+#	include <roaring64map.hh>
 using namespace roaring;
 using BitMap = Roaring64Map;
 #endif
@@ -35,7 +35,44 @@ using Registry = shared_ptr<RegistryImpl>;
 class IndexerImpl;
 using Indexer = shared_ptr<IndexerImpl>;
 
-class IndexerImpl : public enable_shared_from_this<IndexerImpl>, QueryParserAdapter<BitMap>
+class QPAdapter : public QueryParserAdapter<BitMap>
+{
+public:
+	unordered_map<string, size_t> *index;
+
+	QPAdapter(unordered_map<string, size_t> *index)
+	{
+		this->index = index;
+	}
+
+	virtual BitMap Evaluate(const string& token) override
+	{
+		size_t id = (*index)[token];
+		BitMap map;
+		map.add(id);
+        cout << "WRONG: we need to return ComponentMap[c].entities" << endl;
+		return map;
+	}
+
+	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override
+	{
+		return lhs & rhs;
+	}
+
+	virtual BitMap Or(const BitMap& lhs, const BitMap& rhs) override
+	{
+		return lhs | rhs;
+	}
+
+	virtual BitMap Not(const BitMap& rhs) override
+	{
+		auto copy = rhs;
+		copy.flip(0, copy.maximum());
+		return copy;
+	}
+};
+
+class IndexerImpl : public enable_shared_from_this<IndexerImpl>
 {
 
 protected:
@@ -47,6 +84,8 @@ protected:
 
 	unordered_map<string, size_t> index;
 	vector<shared_ptr<ComponentMap>> maps;
+
+	MemoryManager memory_manager;
 
 	size_t NewComponent(const string& key)
 	{
@@ -71,11 +110,11 @@ protected:
 		auto it = index.find(key);
 		if(it != index.end())
 			return it->second;
-		
-        if(auto_create)
+
+		if(auto_create)
 			return NewComponent(key);
-		
-        throw(EntidyException("Key: " + key + " does not exist"));
+
+		throw(EntidyException("Key: " + key + " does not exist"));
 	}
 
 	string ComponentKey(size_t id)
@@ -91,8 +130,9 @@ protected:
 
 public:
 	IndexerImpl()
-    {
-    }
+	{
+		memory_manager = make_shared<MemoryManagerImpl>();
+	}
 
 	bool HasEntity(Entity e)
 	{
@@ -187,51 +227,32 @@ public:
 
 	View Fetch(const vector<string>& keys, const string& filter)
 	{
-        QueryParser<BitMap> qp(this);
-        BitMap bmp = qp.Parse(filter);
+		QueryParser<BitMap> qp(make_shared<QPAdapter>(&index));
+		BitMap query = qp.Parse(filter);
 
-        size_t rows = bmp.cardinality();
-        size_t cols = keys.size() + 1;
-        vector<intptr_t> results(rows * cols);
+		size_t rows = query.cardinality();
+		size_t cols = keys.size() + 1;
+		vector<PagedVector<1024>> results;
+		results.push_back(PagedVector<1024>(memory_manager));
 
-        for(size_t i = 0; i < keys.size(); i++)
+        cout << query.cardinality() << endl;
+		auto it = query.begin();
+        size_t i = 0;
+        while(it != query.end())
         {
-            size_t c = ComponentIndex(keys[i], false);
-            //vector<intptr_t> res = maps[c]->components.Select(bmp.begin(), bmp.end());
-
+            results[0].Write(i++, *it);
+            ++it;
         }
 
-		View iterator(results, rows, cols);
-		return iterator;
+		for(size_t i = 0; i < keys.size(); i++)
+		{
+			results.push_back(PagedVector<1024>(memory_manager));
+			size_t c = ComponentIndex(keys[i], false);
+			maps[c]->components.Select(results[i+1], query.begin(), query.end());
+		}
+
+		return View(results);
 	}
-
-    // Query Parser Adapter functions
-
-	virtual BitMap Evaluate(const string& token) override
-	{
-		size_t id = ComponentIndex(token, false);
-		BitMap map;
-		map.add(id);
-		return map;
-	}
-
-	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override
-	{
-		return lhs & rhs;
-	}
-
-	virtual BitMap Or(const BitMap& lhs, const BitMap& rhs) override
-	{
-		return lhs | rhs;
-	}
-
-	virtual BitMap Not(const BitMap& rhs) override
-	{
-		auto copy = rhs;
-		copy.flip(0, copy.maximum());
-		return copy;
-	}
-
 };
 
 } // namespace entidy

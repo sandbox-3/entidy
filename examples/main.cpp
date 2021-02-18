@@ -77,18 +77,18 @@ public:
 
 int main()
 {
-    MemoryManager memoryManager = make_shared<MemoryManagerImpl>();
-    PagedVector<100> pv(memoryManager);
+    // MemoryManager memoryManager = make_shared<MemoryManagerImpl>();
+    // PagedVector<100> pv(memoryManager);
 
-    pv.Write(299, 4);
+    // pv.Write(299, 4);
 
-    pv.Write(295, 4);
-    pv.Write(293, 4);
+    // pv.Write(295, 4);
+    // pv.Write(293, 4);
 
-    pv.Write(193, 4);
+    // pv.Write(193, 4);
 
-    pv.Write(793, 4);
-    cout << pv.Read(199) << endl;
+    // pv.Write(793, 4);
+    // cout << pv.Read(199) << endl;
 
     //pv[10] = 5;
     // intptr_t t = pv[10];
@@ -100,8 +100,6 @@ int main()
 
     //size_t a = pv[10];
     //cout << a << endl;
-
-    return 0;
 
 	Registry registry = RegistryFactory::New();
 
@@ -120,14 +118,25 @@ int main()
     p1->print();
     p2->print();
 
-	registry->Erase(e2, "position");
-	registry->Erase(e1);
+	//registry->Erase(e2, "position");
+	//registry->Erase(e1);
 
 	Entity e3 = registry->Create();
+	registry->Emplace(e3, "position", Vec3(11, 12, 13));
     cout << e3 << endl;
 
-	// auto query = registry.Select("pos", "vel");
-	// auto it1 = query.Filter("pos & !(vel & stationary) | flying");
+
+
+	//auto query = registry->Select("position");
+	//auto it = query.Filter("(position & velocity)");
+
+    auto it = registry->indexer->Fetch({"position"}, "(position)");
+	it.Each([](Entity e, Vec3 pos)
+	{
+        pos.print();
+	});
+
+
 	// auto it2 = query.Filter();
 
 	// auto it = registry.Select("pos", "vel").Filter();

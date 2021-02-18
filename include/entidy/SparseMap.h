@@ -3,6 +3,9 @@
 #include <vector>
 #include <unordered_map>
 
+#include <entidy/PagedVector.h>
+#include <entidy/MemoryManager.h>
+
 namespace entidy
 {
 using namespace std;
@@ -13,18 +16,25 @@ class SparseMap
 	unordered_map<size_t, Type> map;
 
 public:
+    SparseMap()
+    {
+    }
+
 	void Emplace(size_t key, Type value)
 	{
 		map.emplace(key, value);
 	}
 
     template <typename IterT>
-	vector<Type> Select(intptr_t * buffer, const IterT& begin, const IterT& end) const
+	void Select(PagedVector<1024> &out, const IterT& begin, const IterT& end) const
 	{
-		// vector<Type> out;
-		// for(auto& t : keys)
-		// 	out.push_back(map[t]);
-		// return out;
+        size_t i = 0;
+        auto it = begin;
+		while(it != end)
+        {
+			out.Write(i++, map.find(*it)->second);
+            ++it;
+        }
 	}
 
 	Type Select(size_t key) const

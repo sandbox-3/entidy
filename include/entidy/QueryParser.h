@@ -13,7 +13,6 @@ namespace entidy
     class QueryParserAdapter
     {
     public:
-        virtual ~QueryParserAdapter() {}
         virtual Type Evaluate(const string &token) = 0;
         virtual Type And(const Type &lhs, const Type &rhs) = 0;
         virtual Type Or(const Type &lhs, const Type &rhs) = 0;
@@ -91,7 +90,7 @@ namespace entidy
         }
 
         template <typename Type>
-        Type Evaluate(QueryParserAdapter<Type> * adapter)
+        Type Evaluate(shared_ptr<QueryParserAdapter<Type>> adapter)
         {
             if (op == TokenType::Leaf)
                 return adapter->Evaluate(key);
@@ -113,7 +112,7 @@ namespace entidy
     class QueryParser
     {
     protected:
-        QueryParserAdapter<Type> *adapter;
+        shared_ptr<QueryParserAdapter<Type>> adapter;
 
         deque<Token> Tokenize(const string &query)
         {
@@ -240,7 +239,7 @@ namespace entidy
         }
 
     public:
-        QueryParser(QueryParserAdapter<Type> * adapter)
+        QueryParser(shared_ptr<QueryParserAdapter<Type>> adapter)
         {
             this->adapter = adapter;
         }

@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <vector>
 
+#include <entidy/PagedVector.h>
 #include <entidy/Indexer.h>
 
 namespace entidy
@@ -13,15 +14,11 @@ class IndexerImpl;
 class View
 {
 protected:
-	vector<intptr_t> data;
-	size_t rows;
-	size_t cols;
+	vector<PagedVector<1024>> data;
 
-	View(const vector<intptr_t>& data, size_t rows, size_t cols)
+	View(const vector<PagedVector<1024>>& data)
 	{
 		this->data = data;
-		this->rows = rows;
-		this->cols = cols;
 	}
 
 public:
@@ -32,20 +29,18 @@ public:
 	template <class Ret, class Cls, class... Args>
 	struct lambda_type<Ret (Cls::*)(Args...) const>
 	{
-		vector<intptr_t> data;
-		size_t rows;
-		size_t cols;
+		vector<PagedVector<1024>> data;
 
 		template <size_t N, typename Head, typename... Rest>
 		constexpr std::tuple<Head, Rest...> Indirection(size_t index) const
 		{
 			if constexpr(N == 1)
 				return std::make_tuple(static_cast<Head>(
-					*(typename std::decay<Head>::type*)data[index * rows + (cols - N - 1)]));
+					*(typename std::decay<Head>::type*)data[data.size() - N].Read(index)));
 			else
 				return std::tuple_cat(
 					std::make_tuple(static_cast<Head>(
-						*(typename std::decay<Head>::type*)data[index * rows + (cols - N - 1)])),
+						*(typename std::decay<Head>::type*)data[data.size() - N].Read(index))),
 					Generator<N - 1, Rest...>(index));
 		}
 
@@ -65,11 +60,9 @@ public:
 	void Each(F&& fn) const
 	{
 		lambda_type<F> lt;
-		lt.data = &data[0];
-		lt.rows = rows;
-		lt.cols = cols;
+		lt.data = data;
 
-		for(size_t index = 0; index < rows; index++)
+		for(size_t index = 0; index < data[0].Size(); index++)
 		{
 			std::apply(fn, lt.Get(index));
 		}

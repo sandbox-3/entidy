@@ -7,17 +7,14 @@
 #include <entidy/QueryParser.h>
 #include <entidy/SparseMap.h>
 #include <entidy/View.h>
+#include <entidy/roaring.hh>
 
 namespace entidy
 {
 
 #ifdef ENTIDY_32_BIT
-#	include <roaring.hh>
-using namespace roaring;
 using BitMap = CRoaring;
 #else
-#	include <roaring64map.hh>
-using namespace roaring;
 using BitMap = Roaring64Map;
 #endif
 

@@ -1,17 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(Entidy LANGUAGES C CXX)
-
-set(ENTIDY_VERSION_MAJOR
-    0
-    CACHE STRING "major version" FORCE)
-set(ENTIDY_VERSION_MINOR
-    1
-    CACHE STRING "minor version" FORCE)
-set(ENTIDY_VERSION
-    ${ENTIDY_VERSION_MAJOR}.${ENTIDY_VERSION_MINOR}
-    CACHE STRING "version" FORCE)
-set(THIS_PROJECT_VERSION ${ENTIDY_VERSION})
+project(Entidy
+VERSION 0.1.0
+LANGUAGES C CXX
+)
 
 set(THIS_PROJECT_NS ${PROJECT_NAME})
 
@@ -33,6 +25,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 option(ENTIDY_BUILD_EXAMPLES "Build the examples" ON)
 option(ENTIDY_BUILD_TESTS "Build the tests" OFF)
 option(ENTIDY_BUILD_BENCHMARK "Build the benchmarks" ON)
+option(ENTIDY_BUILD_STATIC "Build a static library" ON)
 
 ## Includes ####################################################################
 
@@ -44,11 +37,6 @@ include(CMakeToolsHelpers OPTIONAL)
 include(GenerateExportHeader)
 
 ## Add Subdirectories ##########################################################
-
-set(ROARING_BUILD_STATIC
-    ON
-    CACHE BOOL "" FORCE)
-add_subdirectory(third_party/CRoaring EXCLUDE_FROM_ALL)
 
 # if(ENTIDY_BUILD_TEST OR ENTIDY_BUILD_BENCHMARK)
 #   add_subdirectory(third_party/Catch2) 
@@ -89,25 +77,40 @@ find_package(Threads REQUIRED)
 
 ## Target Definitions ##########################################################
 
-file(GLOB_RECURSE THIS_PROJECT_CPP src/*.cpp)
+if(ENTIDY_BUILD_STATIC)
+  set(ENTIDY_BUILD_TYPE STATIC)
+  MESSAGE( STATUS "Building a static library." )
+else()
+  MESSAGE( STATUS "Building a dynamic library." )
+  set(ENTIDY_BUILD_TYPE SHARED)
+endif()
+
+
 file(GLOB_RECURSE THIS_PROJECT_H include/*.h)
-add_library(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:roaring>
-                                   ${THIS_PROJECT_SRC})
+file(GLOB_RECURSE THIS_PROJECT_C src/*.c)
+file(GLOB_RECURSE THIS_PROJECT_CPP src/*.cpp)
+
+add_library(${PROJECT_NAME} ${ENTIDY_BUILD_TYPE} ${THIS_PROJECT_C} ${THIS_PROJECT_CPP})
 add_library(${THIS_PROJECT_NS}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads roaring)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 
 set_target_properties(
-  ${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES
+  ${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 
+                             CXX_STANDARD_REQUIRED YES
                              CXX_EXTENSIONS NO)
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
-# install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets
+LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib
+RUNTIME DESTINATION bin
+)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 ## Compile Definitions #########################################################
 
@@ -136,7 +139,7 @@ configure_package_config_file(
 
 write_basic_package_version_file(
   ${PROJECT_NAME}-config-version.cmake
-  VERSION ${THIS_PROJECT_VERSION}
+  VERSION ${PROJECT_VERSION}
   COMPATIBILITY SameMajorVersion)
 
 install(
@@ -146,7 +149,6 @@ install(
 install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
               "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
         DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME})
-install(TARGETS ${PROJECT_NAME})
 
 ## Print Summary ###############################################################
 

@@ -156,7 +156,8 @@ protected:
 		assert(pools.find(key) == pools.end());
 
 		size_t maxc = size_t(65536) / sizeof(Type);
-		size_t defc = size_hint == 0 ? size_t(32768) / sizeof(Type) : defc;
+		size_t defc = size_hint == 0 ? size_t(32768) / sizeof(Type)
+									 : maxc; // TODO: REVIEW? Original impl was meaninglesss
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 

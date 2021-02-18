@@ -35,8 +35,9 @@
 build/
 out/
 
-# IDEs
+# IDEs and Tooling
 CMakeSettings.json
 .vs/
 .vscode/
 .code/
+*cppcheck*

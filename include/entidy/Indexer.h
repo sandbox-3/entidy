@@ -7,17 +7,14 @@
 #include <entidy/QueryParser.h>
 #include <entidy/SparseMap.h>
 #include <entidy/View.h>
+#include <entidy/roaring.hh>
 
 namespace entidy
 {
 
 #ifdef ENTIDY_32_BIT
-#	include <roaring.hh>
-using namespace roaring;
 using BitMap = CRoaring;
 #else
-#	include <roaring64map.hh>
-using namespace roaring;
 using BitMap = Roaring64Map;
 #endif
 
@@ -38,9 +35,9 @@ using Indexer = shared_ptr<IndexerImpl>;
 class QPAdapter : public QueryParserAdapter<BitMap>
 {
 public:
-	unordered_map<string, size_t> *index;
+	unordered_map<string, size_t>* index;
 
-	QPAdapter(unordered_map<string, size_t> *index)
+	QPAdapter(unordered_map<string, size_t>* index)
 	{
 		this->index = index;
 	}
@@ -50,7 +47,7 @@ public:
 		size_t id = (*index)[token];
 		BitMap map;
 		map.add(id);
-        cout << "WRONG: we need to return ComponentMap[c].entities" << endl;
+		cout << "WRONG: we need to return ComponentMap[c].entities" << endl;
 		return map;
 	}
 
@@ -235,20 +232,20 @@ public:
 		vector<PagedVector<1024>> results;
 		results.push_back(PagedVector<1024>(memory_manager));
 
-        cout << query.cardinality() << endl;
+		cout << query.cardinality() << endl;
 		auto it = query.begin();
-        size_t i = 0;
-        while(it != query.end())
-        {
-            results[0].Write(i++, *it);
-            ++it;
-        }
+		size_t i = 0;
+		while(it != query.end())
+		{
+			results[0].Write(i++, *it);
+			++it;
+		}
 
 		for(size_t i = 0; i < keys.size(); i++)
 		{
 			results.push_back(PagedVector<1024>(memory_manager));
 			size_t c = ComponentIndex(keys[i], false);
-			maps[c]->components.Select(results[i+1], query.begin(), query.end());
+			maps[c]->components.Select(results[i + 1], query.begin(), query.end());
 		}
 
 		return View(results);

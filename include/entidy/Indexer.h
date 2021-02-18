@@ -2,11 +2,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <entidy/Exception.h>
 #include <entidy/Entity.h>
-#include <entidy/View.h>
-#include <entidy/SparseMap.h>
+#include <entidy/Exception.h>
 #include <entidy/QueryParser.h>
+#include <entidy/SparseMap.h>
+#include <entidy/View.h>
 
 namespace entidy
 {
@@ -71,11 +71,11 @@ protected:
 		auto it = index.find(key);
 		if(it != index.end())
 			return it->second;
-		
-        if(auto_create)
+
+		if(auto_create)
 			return NewComponent(key);
-		
-        throw(EntidyException("Key: " + key + " does not exist"));
+
+		throw(EntidyException("Key: " + key + " does not exist"));
 	}
 
 	string ComponentKey(size_t id)
@@ -90,9 +90,7 @@ protected:
 	}
 
 public:
-	IndexerImpl()
-    {
-    }
+	IndexerImpl() { }
 
 	bool HasEntity(Entity e)
 	{
@@ -187,25 +185,24 @@ public:
 
 	View Fetch(const vector<string>& keys, const string& filter)
 	{
-        QueryParser<BitMap> qp(this);
-        BitMap bmp = qp.Parse(filter);
+		QueryParser<BitMap> qp(this);
+		BitMap bmp = qp.Parse(filter);
 
-        size_t rows = bmp.cardinality();
-        size_t cols = keys.size() + 1;
-        vector<intptr_t> results(rows * cols);
+		size_t rows = bmp.cardinality();
+		size_t cols = keys.size() + 1;
+		vector<intptr_t> results(rows * cols);
 
-        for(size_t i = 0; i < keys.size(); i++)
-        {
-            size_t c = ComponentIndex(keys[i], false);
-            //vector<intptr_t> res = maps[c]->components.Select(bmp.begin(), bmp.end());
-
-        }
+		for(size_t i = 0; i < keys.size(); i++)
+		{
+			size_t c = ComponentIndex(keys[i], false);
+			//vector<intptr_t> res = maps[c]->components.Select(bmp.begin(), bmp.end());
+		}
 
 		View iterator(results, rows, cols);
 		return iterator;
 	}
 
-    // Query Parser Adapter functions
+	// Query Parser Adapter functions
 
 	virtual BitMap Evaluate(const string& token) override
 	{
@@ -231,7 +228,6 @@ public:
 		copy.flip(0, copy.maximum());
 		return copy;
 	}
-
 };
 
 } // namespace entidy

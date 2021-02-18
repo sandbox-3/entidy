@@ -124,8 +124,8 @@ int main()
 	//auto query = registry->Select("position");
 	//auto it = query.Filter("(position & velocity)");
 
-	auto it = registry->indexer->Fetch({"position"}, "(position)");
-	it.Each([](Entity e, Vec3 pos) { pos.print(); });
+	// auto it = registry->indexer->Fetch({"position"}, "(position)");
+	// it.Each([](Entity e, Vec3 pos) { pos.print(); });
 
 	// auto it2 = query.Filter();
 

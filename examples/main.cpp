@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include <entidy/roaring.hh>
+#include <entidy/CRoaring/roaring.hh>
 
 #include <entidy/Entidy.h>
 #include <entidy/MemoryManager.h>

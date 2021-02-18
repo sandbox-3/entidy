@@ -6,7 +6,6 @@
 #include <tuple>
 #include <unordered_map>
 
-#include <entidy/Entity.h>
 #include <entidy/QueryParser.h>
 #include <entidy/Indexer.h>
 #include <entidy/View.h>

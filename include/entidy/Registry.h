@@ -6,7 +6,6 @@
 #include <tuple>
 #include <unordered_map>
 
-#include <entidy/Entity.h>
 #include <entidy/Exception.h>
 #include <entidy/MemoryManager.h>
 #include <entidy/Indexer.h>
@@ -16,6 +15,8 @@
 namespace entidy
 {
 using namespace std;
+
+using Entity = size_t;
 
 class RegistryFactory;
 

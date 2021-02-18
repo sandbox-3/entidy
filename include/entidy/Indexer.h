@@ -2,12 +2,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <entidy/Entity.h>
 #include <entidy/Exception.h>
 #include <entidy/QueryParser.h>
 #include <entidy/SparseMap.h>
 #include <entidy/View.h>
-#include <entidy/roaring.hh>
+#include <entidy/CRoaring/roaring.hh>
 
 namespace entidy
 {
@@ -19,6 +18,8 @@ using BitMap = Roaring64Map;
 #endif
 
 using namespace std;
+
+using Entity = size_t;
 
 struct ComponentMap
 {

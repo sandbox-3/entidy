@@ -1,9 +1,14 @@
 find_package(Threads REQUIRED)
 
-add_executable(entidy_benchmark main.cpp)
+add_executable(micro micro.cpp)
+add_executable(macro macro.cpp)
 
-target_link_libraries(entidy_benchmark PRIVATE Threads::Threads Entidy::Entidy)
+target_include_directories(micro PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/benchmark>)
+target_include_directories(macro PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/benchmark>)
 
-set_target_properties(
-  entidy_benchmark PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES
-                              CXX_EXTENSIONS NO)
+target_link_libraries(micro PRIVATE Threads::Threads Entidy::Entidy)
+target_link_libraries(macro PRIVATE Threads::Threads Entidy::Entidy)
+
+set_target_properties(micro PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
+set_target_properties(macro PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
+                              

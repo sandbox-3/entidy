@@ -2,11 +2,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include <entidy/CRoaring/roaring.hh>
 #include <entidy/Exception.h>
 #include <entidy/QueryParser.h>
-#include <entidy/SparseMap.h>
 #include <entidy/View.h>
-#include <entidy/CRoaring/roaring.hh>
 
 namespace entidy
 {
@@ -24,7 +23,7 @@ using Entity = size_t;
 struct ComponentMap
 {
 	BitMap entities;
-	SparseMap<intptr_t> components;
+	PagedVector<1024> components;
 };
 
 class RegistryImpl;
@@ -33,49 +32,12 @@ using Registry = shared_ptr<RegistryImpl>;
 class IndexerImpl;
 using Indexer = shared_ptr<IndexerImpl>;
 
-class QPAdapter : public QueryParserAdapter<BitMap>
-{
-public:
-	unordered_map<string, size_t>* index;
-
-	QPAdapter(unordered_map<string, size_t>* index)
-	{
-		this->index = index;
-	}
-
-	virtual BitMap Evaluate(const string& token) override
-	{
-		size_t id = (*index)[token];
-		BitMap map;
-		map.add(id);
-		cout << "WRONG: we need to return ComponentMap[c].entities" << endl;
-		return map;
-	}
-
-	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override
-	{
-		return lhs & rhs;
-	}
-
-	virtual BitMap Or(const BitMap& lhs, const BitMap& rhs) override
-	{
-		return lhs | rhs;
-	}
-
-	virtual BitMap Not(const BitMap& rhs) override
-	{
-		auto copy = rhs;
-		copy.flip(0, copy.maximum());
-		return copy;
-	}
-};
-
-class IndexerImpl : public enable_shared_from_this<IndexerImpl>
+class IndexerImpl : public enable_shared_from_this<IndexerImpl>, public QueryParserAdapter<BitMap>
 {
 
 protected:
 	vector<Entity> entity_pool;
-	Entity entityRefCount = 0;
+	Entity entityRefCount = 1;
 
 	vector<size_t> component_pool;
 	size_t componentRefCount = 0;
@@ -98,6 +60,7 @@ protected:
 		{
 			c = componentRefCount++;
 			maps.emplace_back(make_shared<ComponentMap>());
+            maps.back()->components = make_shared<PagedVectorImpl<1024>>(memory_manager);
 			index.emplace(key, c);
 		}
 		return c;
@@ -164,7 +127,7 @@ public:
 		for(auto& map : maps)
 		{
 			map->entities.remove(entity);
-			map->components.Remove(entity);
+			map->components->Erase(entity);
 		}
 
 		entity_pool.push_back(entity);
@@ -180,20 +143,20 @@ public:
 	{
 		size_t c = ComponentIndex(key);
 		maps[c]->entities.add(entity);
-		maps[c]->components.Emplace(entity, component);
+		maps[c]->components->Write(entity, component);
 	}
 
 	void RemoveComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
 		maps[c]->entities.remove(entity);
-		maps[c]->components.Remove(entity);
+		maps[c]->components->Erase(entity);
 	}
 
 	intptr_t GetComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-		return maps[c]->components.Select(entity);
+		return maps[c]->components->Read(entity);
 	}
 
 	unordered_map<string, intptr_t> GetAllComponents(Entity entity)
@@ -203,7 +166,7 @@ public:
 		{
 			auto map = maps[i];
 			if(map->entities.contains(entity))
-				out.emplace(ComponentKey(i), map->components.Select(entity));
+				out.emplace(ComponentKey(i), map->components->Read(entity));
 		}
 		return out;
 	}
@@ -225,31 +188,77 @@ public:
 
 	View Fetch(const vector<string>& keys, const string& filter)
 	{
-		QueryParser<BitMap> qp(make_shared<QPAdapter>(&index));
-		BitMap query = qp.Parse(filter);
+		QueryParser<BitMap> qp(this);
+		BitMap query;
+
+		if(filter == "")
+		{ 
+            query = Evaluate(keys[0]);
+			for(size_t k = 1; k < keys.size(); k++)
+				query &= Evaluate(keys[k]);
+        }
+		else
+		{
+			query = qp.Parse(filter);
+			for(auto k : keys)
+				query &= Evaluate(k);
+		}
 
 		size_t rows = query.cardinality();
 		size_t cols = keys.size() + 1;
 		vector<PagedVector<1024>> results;
-		results.push_back(PagedVector<1024>(memory_manager));
+		results.push_back(make_shared<PagedVectorImpl<1024>>(memory_manager));
 
-		cout << query.cardinality() << endl;
 		auto it = query.begin();
 		size_t i = 0;
 		while(it != query.end())
 		{
-			results[0].Write(i++, *it);
+			results[0]->Write(i, *it);
 			++it;
+			++i;
 		}
 
-		for(size_t i = 0; i < keys.size(); i++)
+		for(size_t k = 0; k < keys.size(); k++)
 		{
-			results.push_back(PagedVector<1024>(memory_manager));
-			size_t c = ComponentIndex(keys[i], false);
-			maps[c]->components.Select(results[i + 1], query.begin(), query.end());
+			results.push_back(make_shared<PagedVectorImpl<1024>>(memory_manager));
+			size_t c = ComponentIndex(keys[k], false);
+
+            i = 0;
+            it = query.begin();
+            while(it != query.end())
+            {
+                results.back()->Write(i, maps[c]->components->Read(*it));
+                ++it;
+                ++i;
+            }
 		}
 
 		return View(results);
+	}
+
+	// Query Parser Adapter Functions
+
+	virtual BitMap Evaluate(const string& token) override
+	{
+		size_t id = ComponentIndex(token, false);
+		return maps[id]->entities;
+	}
+
+	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override
+	{
+		return lhs & rhs;
+	}
+
+	virtual BitMap Or(const BitMap& lhs, const BitMap& rhs) override
+	{
+		return lhs | rhs;
+	}
+
+	virtual BitMap Not(const BitMap& rhs) override
+	{
+		auto copy = rhs;
+		copy.flip(0, copy.maximum());
+		return copy;
 	}
 };
 

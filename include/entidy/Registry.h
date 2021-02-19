@@ -97,10 +97,9 @@ public:
 		return Query(indexer, keys);
 	}
 
-	template <typename... Args>
-	Query Select(Args&&... args)
+	Query Select(const string &args...)
 	{
-		return Query(indexer, args...);
+		return Query(indexer, args);
 	}
 
 	template <typename Type>

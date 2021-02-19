@@ -30,10 +30,10 @@ protected:
 		this->select = keys;
 	}
 
-	template <typename... Args>
-	Query(Indexer indexer, Args... keys)
+	Query(Indexer indexer, const string &keys...)
 	{
-		Query(indexer, initializer_list<string>{keys...});
+		this->indexer = indexer;
+		this->select = initializer_list<string>{keys};
 	}
 
 public:

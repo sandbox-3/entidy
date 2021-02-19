@@ -147,7 +147,7 @@ protected:
 		std::function<void(const string& key, intptr_t ptr)> push;
 		size_t counter;
 	};
-	unordered_map<string, ManagedPool> pools;
+	unordered_map<string, shared_ptr<ManagedPool>> pools;
 	unordered_map<string, size_t> hints;
 
 	template <typename Type>
@@ -156,16 +156,15 @@ protected:
 		assert(pools.find(key) == pools.end());
 
 		size_t maxc = size_t(65536) / sizeof(Type);
-		size_t defc = size_hint == 0 ? size_t(32768) / sizeof(Type)
-									 : maxc; // TODO: REVIEW? Original impl was meaninglesss
+		size_t defc = size_hint == 0 ? size_t(32768) / sizeof(Type) : size_hint;
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 
-		auto managed_pool = ManagedPool{};
-		managed_pool.pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
-		managed_pool.push = [&](const string& key, intptr_t ptr) {
+		auto managed_pool = make_shared<ManagedPool>();
+		managed_pool->pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
+		managed_pool->push = [&](const string& key, intptr_t ptr) {
 			assert(pools.find(key) != pools.end());
-			MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(pools[key].pool.get());
+			MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(pools[key]->pool.get());
 			mp->Push((Type*)(ptr));
 		};
 
@@ -180,8 +179,8 @@ public:
 		auto it = pools.find(key);
 		assert(it != pools.end());
 
-		it->second.push(key, ptr);
-		--it->second.counter;
+		it->second->push(key, ptr);
+		it->second->counter--;
 	}
 
 	template <typename Type>
@@ -193,8 +192,8 @@ public:
 
 		it = pools.find(key);
 
-		++it->second.counter;
-		MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(it->second.pool.get());
+		it->second->counter++;
+		MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(it->second->pool.get());
 		return mp->Pop();
 	}
 
@@ -202,7 +201,7 @@ public:
 	{
 		auto it = pools.begin();
 		while(it != pools.end())
-			if(it->second.counter == 0)
+			if(it->second->counter == 0)
 				it = pools.erase(it);
 	}
 

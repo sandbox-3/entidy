@@ -14,6 +14,11 @@ using namespace std;
 class MemoryManagerImpl;
 using MemoryManager = shared_ptr<MemoryManagerImpl>;
 
+template <size_t PageSize>
+class PagedVectorImpl;
+template <size_t PageSize>
+using PagedVector = shared_ptr<PagedVectorImpl<PageSize>>;
+
 template <size_t Size>
 struct Page
 {
@@ -22,7 +27,7 @@ struct Page
 };
 
 template <size_t PageSize>
-class PagedVector
+class PagedVectorImpl
 {
 protected:
 	shared_ptr<vector<Page<PageSize>*>> pages;
@@ -38,14 +43,15 @@ protected:
     }
 
 public:
-	PagedVector(MemoryManager memory_manager)
+
+	PagedVectorImpl(MemoryManager memory_manager)
     { 
         this->memory_manager = memory_manager;
         this->key = "entidy::PagedVector(" + to_string(PageSize) + ")";
         this->pages = make_shared<vector<Page<PageSize>*>>();
     }
 
-    ~PagedVector()
+    ~PagedVectorImpl()
     {
         for(auto it : (*pages))
         {

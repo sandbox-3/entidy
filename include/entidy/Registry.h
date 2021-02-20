@@ -59,13 +59,12 @@ public:
 	Type* Emplace(Entity entity, const string& key, const Type& component)
 	{
 		if(indexer->HasComponent(entity, key))
-			throw EntidyException("Key: " + key +
-								  " already exists for Entity: " + to_string(entity));
+			throw EntidyException("Key: " + key + " already exists for Entity: " + to_string(entity));
 
 		Type* c = memory_manager->Pop<Type>(key);
 		memcpy(c, &component, sizeof(Type));
 
-		indexer->AddComponent(entity, key, (intptr_t)c);
+		indexer->AddComponent(entity, key, (intptr_t)(c));
 		return c;
 	}
 

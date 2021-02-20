@@ -60,7 +60,7 @@ public:
         }
     }
 
-    const intptr_t Read(size_t index) const
+    intptr_t Read(size_t index) const
     {
         size_t page_index = std::floor(index / PageSize);
         if(page_index >= pages->size())

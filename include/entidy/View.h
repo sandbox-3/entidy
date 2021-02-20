@@ -36,14 +36,14 @@ public:
 		constexpr std::tuple<Head, Rest...> Indirection(size_t index) const
 		{
 			if constexpr(N == 1)
-				return std::make_tuple(static_cast<Head>(*(typename std::decay<Head>::type*)data[data.size() - N]->Read(index)));
+				return std::make_tuple(static_cast<Head>((typename std::decay<Head>::type)data[data.size() - N]->Read(index)));
 
             else if constexpr (N == Nmax)
 				return std::tuple_cat(std::make_tuple(static_cast<Head>(data[0]->Read(index))),
 					Generator<Nmax, N - 1, Rest...>(index));
                     
 			else
-				return std::tuple_cat(std::make_tuple(static_cast<Head>(*(typename std::decay<Head>::type*)data[data.size() - N]->Read(index))),
+				return std::tuple_cat(std::make_tuple(static_cast<Head>((typename std::decay<Head>::type)data[data.size() - N]->Read(index))),
 					Generator<Nmax, N - 1, Rest...>(index));
 		}
 

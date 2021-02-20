@@ -111,7 +111,10 @@ public:
 			if(block->Available() == block->Capacity())
 			{
 				if(prune)
+                {
 					it = pool.erase(it);
+                    continue;
+                }
 				prune = true;
 			}
 			++it;

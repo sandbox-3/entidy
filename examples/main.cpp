@@ -76,6 +76,15 @@ public:
 
 int main()
 {
+    MemoryManager memory = make_shared<MemoryManagerImpl>();
+    PagedVector<1024> pv = make_shared<PagedVectorImpl<1024>>(memory);
+    for(int i = 0; i < 1000000; i++)
+        pv->Write(i, i);
+
+    for(int i = 0; i < 1000000; i++)
+        if(pv->Read(i) != i)
+            cout << "mismatch: " << i << endl;
+
 	Registry registry = RegistryFactory::New();
 
 	Entity e1 = registry->Create();
@@ -98,10 +107,10 @@ int main()
 	auto it = query.Filter("position");
 
 	// auto it = registry->indexer->Fetch({"position"}, "(position)");
-	it.Each([](Entity e, Vec3 pos) { 
+	it.Each([&](Entity e, Vec3 *pos) { 
         
         cout << e << endl;
-        pos.print();
+        pos->print();
         });
 
 	// auto it2 = query.Filter();

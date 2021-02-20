@@ -33,7 +33,7 @@ protected:
 	Query(Indexer indexer, const string &keys...)
 	{
 		this->indexer = indexer;
-		this->select = initializer_list<string>{keys};
+		this->select = {keys};
 	}
 
 public:

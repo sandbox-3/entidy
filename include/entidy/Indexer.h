@@ -60,7 +60,7 @@ protected:
 		{
 			c = componentRefCount++;
 			maps.emplace_back(make_shared<ComponentMap>());
-            maps.back()->components = make_shared<PagedVectorImpl<1024>>(memory_manager);
+			maps.back()->components = make_shared<PagedVectorImpl<1024>>(memory_manager);
 			index.emplace(key, c);
 		}
 		return c;
@@ -192,11 +192,11 @@ public:
 		BitMap query;
 
 		if(filter == "")
-		{ 
-            query = Evaluate(keys[0]);
+		{
+			query = Evaluate(keys[0]);
 			for(size_t k = 1; k < keys.size(); k++)
 				query &= Evaluate(keys[k]);
-        }
+		}
 		else
 		{
 			query = qp.Parse(filter);
@@ -204,33 +204,31 @@ public:
 				query &= Evaluate(k);
 		}
 
-		size_t rows = query.cardinality();
-		size_t cols = keys.size() + 1;
 		vector<PagedVector<1024>> results;
-		results.push_back(make_shared<PagedVectorImpl<1024>>(memory_manager));
 
-		auto it = query.begin();
+		for(size_t k = 0; k < keys.size() + 1; k++)
+			results.push_back(make_shared<PagedVectorImpl<1024>>(memory_manager));
+
 		size_t i = 0;
+		auto it = query.begin();
 		while(it != query.end())
-		{
+        {
 			results[0]->Write(i, *it);
-			++it;
-			++i;
-		}
+            ++i;
+            ++it;
+        }
 
 		for(size_t k = 0; k < keys.size(); k++)
 		{
-			results.push_back(make_shared<PagedVectorImpl<1024>>(memory_manager));
-			size_t c = ComponentIndex(keys[k], false);
-
-            i = 0;
-            it = query.begin();
-            while(it != query.end())
-            {
-                results.back()->Write(i, maps[c]->components->Read(*it));
-                ++it;
-                ++i;
-            }
+		    i = 0;
+			it = query.begin();
+			while(it != query.end())
+			{
+				size_t c = ComponentIndex(keys[k], false);
+				results[k + 1]->Write(i, maps[c]->components->Read(*it));
+				++i;
+				++it;
+			}
 		}
 
 		return View(results);
@@ -241,7 +239,7 @@ public:
 	virtual BitMap Evaluate(const string& token) override
 	{
 		size_t id = ComponentIndex(token, false);
-		return maps[id]->entities;
+        return maps[id]->entities;
 	}
 
 	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override
@@ -256,7 +254,7 @@ public:
 
 	virtual BitMap Not(const BitMap& rhs) override
 	{
-		auto copy = rhs;
+		auto copy = BitMap(rhs);
 		copy.flip(0, copy.maximum());
 		return copy;
 	}

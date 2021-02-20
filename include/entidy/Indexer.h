@@ -77,18 +77,7 @@ protected:
 
 		throw(EntidyException("Key: " + key + " does not exist"));
 	}
-
-	string ComponentKey(size_t id)
-	{
-		for(auto& it : index)
-		{
-			if(it.second == id)
-				return it.first;
-		}
-
-		throw(EntidyException("Component Id: " + to_string(id) + " does not exist"));
-	}
-
+    
 public:
 	IndexerImpl()
 	{
@@ -139,18 +128,22 @@ public:
 		return maps[c].entities.contains(e);
 	}
 
-	void AddComponent(Entity entity, const string& key, intptr_t component)
+	intptr_t AddComponent(Entity entity, const string& key, intptr_t component)
 	{
 		size_t c = ComponentIndex(key);
-		maps[c].entities.add(entity);
+        intptr_t prev = maps[c].components->Read(entity);
 		maps[c].components->Write(entity, component);
+		maps[c].entities.add(entity);
+        return prev;
 	}
 
-	void RemoveComponent(Entity entity, const string& key)
+	intptr_t RemoveComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-		maps[c].entities.remove(entity);
+        intptr_t prev = maps[c].components->Read(entity);
 		maps[c].components->Erase(entity);
+		maps[c].entities.remove(entity);
+        return prev;
 	}
 
 	intptr_t GetComponent(Entity entity, const string& key)
@@ -159,15 +152,16 @@ public:
 		return maps[c].components->Read(entity);
 	}
 
-	unordered_map<string, intptr_t> GetAllComponents(Entity entity)
+	vector<pair<string, intptr_t>> GetAllComponents(Entity entity)
 	{
-		unordered_map<string, intptr_t> out;
-		for(size_t i = 0; i < maps.size(); i++)
-		{
-			auto map = maps[i];
-			if(map.entities.contains(entity))
-				out.emplace(ComponentKey(i), map.components->Read(entity));
-		}
+		vector<pair<string, intptr_t>> out;
+        for(auto &it : index)
+        {
+			auto &map = maps[it.second];
+            intptr_t ptr = map.components->Read(entity);
+            if(ptr != 0)
+                out.push_back(pair(it.first, ptr));
+        }
 		return out;
 	}
 
@@ -205,7 +199,6 @@ public:
 		}
 
 		vector<PagedVector<1024>> results;
-
 		for(size_t k = 0; k < keys.size() + 1; k++)
 			results.push_back(make_shared<PagedVectorImpl<1024>>(memory_manager));
 

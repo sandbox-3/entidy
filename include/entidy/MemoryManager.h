@@ -159,8 +159,8 @@ protected:
 	{
 		assert(pools.find(key) == pools.end());
 
-		size_t maxc = size_t(65536) / sizeof(Type);
-		size_t defc = size_hint == 0 ? size_t(32768) / sizeof(Type) : size_hint;
+		size_t maxc = size_t(1048576) / sizeof(Type);
+		size_t defc = size_hint == 0 ? size_t(1048576) / sizeof(Type) : size_hint;
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 

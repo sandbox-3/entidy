@@ -30,12 +30,6 @@ protected:
 		this->select = keys;
 	}
 
-	Query(Indexer indexer, const string &keys...)
-	{
-		this->indexer = indexer;
-		this->select = {keys};
-	}
-
 public:
 	View Filter(const string& filter = "")
 	{

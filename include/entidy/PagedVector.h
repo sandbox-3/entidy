@@ -63,8 +63,10 @@ public:
     {
         size_t page_index = std::floor(index / PageSize);
         if(page_index >= pages.size())
-            throw(EntidyException("PagedVector::Read() Index [" + to_string(index) + "] out of range (" + to_string(pages.size() * PageSize) + ")"));
-
+            return 0;
+        if(pages[page_index] == nullptr)
+            return 0;
+            
         size_t block_index = index - (page_index * PageSize);
         return pages[page_index]->data[block_index];
     }

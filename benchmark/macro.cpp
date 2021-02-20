@@ -46,7 +46,7 @@ public:
         cout << "0" << endl;
 		rand_r(&seed);
 		Registry registry = RegistryFactory::New();
-		size_t count = 10000;
+		size_t count = 1000000;
 		for(size_t i = 0; i < count; i++)
 		{
 			Entity e = registry->Create();
@@ -57,6 +57,7 @@ public:
 			auto query = registry->Select("Comp1");
 			auto it = query.Filter();
 			it.Each([&](Entity e, Comp<1> *comp1) {
+
                 comp1->a[0] = 1;
 				if(RandProb(0.25))
 					registry->Emplace(e, "Comp2", Comp<2>());

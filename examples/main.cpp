@@ -84,6 +84,31 @@ int main()
     for(int i = 0; i < 1000000; i++)
         if(pv->Read(i) != i)
             cout << "mismatch: " << i << endl;
+    
+    for(int i = 0; i < 1000; i++)
+        if(rand() % 100 < 80)
+            pv->Erase(i);
+    
+    for(int i = 1000; i < 1000000; i++)
+        if(rand() % 100 < 80)
+            pv->Erase(i);
+    
+    for(int i = 0; i < 1000000; i++)
+        if(rand() % 100 < 80)
+            pv->Erase(i);
+    
+    for(int i = 0; i < 1000000; i++)
+        if(rand() % 100 < 80)
+            pv->Erase(i);
+
+    for(int i = 0; i < 1000000; i++)
+        if(rand() % 100 < 80)
+            pv->Erase(i);
+            
+    for(int i = 0; i < 1000000; i++)
+        if(pv->Read(i) != i && pv->Read(1) != 0)
+            cout << "mismatch: " << i << endl;
+    
 
 	Registry registry = RegistryFactory::New();
 

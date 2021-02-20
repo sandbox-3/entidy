@@ -11,7 +11,7 @@ namespace entidy
 {
 
 #ifdef ENTIDY_32_BIT
-using BitMap = CRoaring;
+using BitMap = Roaring;
 #else
 using BitMap = Roaring64Map;
 #endif
@@ -43,7 +43,7 @@ protected:
 	size_t componentRefCount = 0;
 
 	unordered_map<string, size_t> index;
-	vector<shared_ptr<ComponentMap>> maps;
+	vector<ComponentMap> maps;
 
 	MemoryManager memory_manager;
 
@@ -59,8 +59,8 @@ protected:
 		else
 		{
 			c = componentRefCount++;
-			maps.emplace_back(make_shared<ComponentMap>());
-			maps.back()->components = make_shared<PagedVectorImpl<1024>>(memory_manager);
+			maps.emplace_back(ComponentMap());
+			maps.back().components = make_shared<PagedVectorImpl<1024>>(memory_manager);
 			index.emplace(key, c);
 		}
 		return c;
@@ -126,8 +126,8 @@ public:
 	{
 		for(auto& map : maps)
 		{
-			map->entities.remove(entity);
-			map->components->Erase(entity);
+			map.entities.remove(entity);
+			map.components->Erase(entity);
 		}
 
 		entity_pool.push_back(entity);
@@ -136,27 +136,27 @@ public:
 	bool HasComponent(Entity e, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-		return maps[c]->entities.contains(e);
+		return maps[c].entities.contains(e);
 	}
 
 	void AddComponent(Entity entity, const string& key, intptr_t component)
 	{
 		size_t c = ComponentIndex(key);
-		maps[c]->entities.add(entity);
-		maps[c]->components->Write(entity, component);
+		maps[c].entities.add(entity);
+		maps[c].components->Write(entity, component);
 	}
 
 	void RemoveComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-		maps[c]->entities.remove(entity);
-		maps[c]->components->Erase(entity);
+		maps[c].entities.remove(entity);
+		maps[c].components->Erase(entity);
 	}
 
 	intptr_t GetComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-		return maps[c]->components->Read(entity);
+		return maps[c].components->Read(entity);
 	}
 
 	unordered_map<string, intptr_t> GetAllComponents(Entity entity)
@@ -165,8 +165,8 @@ public:
 		for(size_t i = 0; i < maps.size(); i++)
 		{
 			auto map = maps[i];
-			if(map->entities.contains(entity))
-				out.emplace(ComponentKey(i), map->components->Read(entity));
+			if(map.entities.contains(entity))
+				out.emplace(ComponentKey(i), map.components->Read(entity));
 		}
 		return out;
 	}
@@ -177,12 +177,12 @@ public:
 		while(it != index.end())
 		{
 			auto map = maps[it->second];
-			if(map->entities.cardinality() == 0)
+			if(map.entities.cardinality() == 0)
 			{
 				it = index.erase(it);
 				component_pool.push_back(it->second);
 			}
-			map->entities.shrinkToFit();
+			map.entities.shrinkToFit();
 		}
 	}
 
@@ -190,7 +190,7 @@ public:
 	{
 		QueryParser<BitMap> qp(this);
 		BitMap query;
-
+        
 		if(filter == "")
 		{
 			query = Evaluate(keys[0]);
@@ -225,7 +225,7 @@ public:
 			while(it != query.end())
 			{
 				size_t c = ComponentIndex(keys[k], false);
-				results[k + 1]->Write(i, maps[c]->components->Read(*it));
+				results[k + 1]->Write(i, maps[c].components->Read(*it));
 				++i;
 				++it;
 			}
@@ -239,7 +239,7 @@ public:
 	virtual BitMap Evaluate(const string& token) override
 	{
 		size_t id = ComponentIndex(token, false);
-        return maps[id]->entities;
+        return maps[id].entities;
 	}
 
 	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override

@@ -27,6 +27,7 @@ protected:
 
 	MemoryBlock(size_t item_capacity)
 	{
+        this->item_capacity = item_capacity;
 		data = new std::aligned_storage_t<sizeof(Type), alignof(Type)>[item_capacity];
 		pointer = reinterpret_cast<Type*>(data);
 

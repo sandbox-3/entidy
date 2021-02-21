@@ -27,7 +27,7 @@ protected:
 
 	MemoryBlock(size_t item_capacity)
 	{
-        this->item_capacity = item_capacity;
+		this->item_capacity = item_capacity;
 		data = new std::aligned_storage_t<sizeof(Type), alignof(Type)>[item_capacity];
 		pointer = reinterpret_cast<Type*>(data);
 
@@ -81,7 +81,7 @@ template <typename Type>
 class MemoryPool
 {
 protected:
-	deque<shared_ptr<MemoryBlock<Type>>> pool;
+	deque<MemoryBlock<Type>*> pool;
 	size_t item_capacity;
 
 	MemoryPool(size_t item_capacity)
@@ -90,7 +90,11 @@ protected:
 	}
 
 public:
-	~MemoryPool() { }
+	~MemoryPool()
+    { 
+        for(MemoryBlock<Type>* it : pool)
+            delete it;
+    }
 
 	void Push(Type* ptr)
 	{
@@ -98,7 +102,7 @@ public:
 		auto it = pool.begin();
 		while(it != pool.end())
 		{
-			shared_ptr<MemoryBlock<Type>> block = *it;
+			MemoryBlock<Type>* block = *it;
 			Type* range_start = block->Pointer();
 			Type* range_end = block->Pointer() + item_capacity;
 
@@ -112,10 +116,10 @@ public:
 			if(block->Available() == block->Capacity())
 			{
 				if(prune)
-                {
+				{
 					it = pool.erase(it);
-                    continue;
-                }
+					continue;
+				}
 				prune = true;
 			}
 			++it;
@@ -130,8 +134,7 @@ public:
 				return block->Pop();
 		}
 
-		shared_ptr<MemoryBlock<Type>> new_block =
-			shared_ptr<MemoryBlock<Type>>(new MemoryBlock<Type>(item_capacity));
+		MemoryBlock<Type>* new_block = new MemoryBlock<Type>(item_capacity);
 		pool.push_back(new_block);
 		return new_block->Pop();
 	}
@@ -151,7 +154,7 @@ protected:
 		std::function<void(const string& key, intptr_t ptr)> push;
 		size_t counter;
 	};
-	unordered_map<string, shared_ptr<ManagedPool>> pools;
+	unordered_map<string, ManagedPool*> pools;
 	unordered_map<string, size_t> hints;
 
 	template <typename Type>
@@ -164,7 +167,7 @@ protected:
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 
-		auto managed_pool = make_shared<ManagedPool>();
+		ManagedPool * managed_pool = new ManagedPool();
 		managed_pool->pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
 		managed_pool->push = [&](const string& key, intptr_t ptr) {
 			assert(pools.find(key) != pools.end());
@@ -176,7 +179,13 @@ protected:
 	}
 
 public:
-	MemoryManagerImpl() { }
+	MemoryManagerImpl()
+    {
+        for(auto &it : pools)
+        {
+            delete it.second;
+        }
+    }
 
 	void Push(const string& key, intptr_t ptr)
 	{

@@ -56,10 +56,10 @@ using namespace entt;
 
 class Entidy : public BenchmarkTarget
 {
-	size_t count = 10000000;
+	size_t count;
 
 public:
-	Entidy() { }
+	Entidy(size_t count) { this->count = count;}
 
 	virtual void Scenario1(unsigned int seed) override
 	{
@@ -160,10 +160,10 @@ public:
 
 class EnTT : public BenchmarkTarget
 {
-	size_t count = 10000000;
+	size_t count;
 
 public:
-	EnTT() { }
+	EnTT(size_t count) { this->count = count;}
 
 	virtual void Scenario1(unsigned int seed) override
 	{
@@ -264,15 +264,17 @@ int main(int argc, char** argv)
 {
 	using namespace entidy_benchmark;
 
+    size_t count = 10000000;
+
 	cout << "OURS" << endl;
 	{
-		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>();
+		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
 		ours->Scenario1(1);
 	}
 	cout << "ENTT" << endl;
 	{
-		shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>();
-		entt->Scenario1(1);
+	    shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);
+	 	entt->Scenario1(1);
 	}
 	return 0;
 }

@@ -1,10 +1,8 @@
 #pragma once
 
 #include <assert.h>
-#include <deque>
 #include <functional>
-#include <iostream>
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -23,19 +21,23 @@ protected:
 	std::aligned_storage_t<sizeof(Type), alignof(Type)>* data;
 	vector<Type*> pool;
 	size_t item_capacity;
-	Type* pointer;
+	intptr_t start;
+	intptr_t end;
 
 	MemoryBlock(size_t item_capacity)
 	{
 		this->item_capacity = item_capacity;
+        pool.resize(item_capacity);
 		data = new std::aligned_storage_t<sizeof(Type), alignof(Type)>[item_capacity];
-		pointer = reinterpret_cast<Type*>(data);
 
+		Type* pointer = reinterpret_cast<Type*>(data);
 		for(size_t i = 0; i < item_capacity; i++)
 		{
 			Type* ptr = pointer + i;
-			pool.push_back(ptr);
+			pool[i] = ptr;
 		}
+        start = (intptr_t)pool[0];
+        end = (intptr_t)pool.back();
 	}
 
 public:
@@ -67,9 +69,14 @@ public:
 		return back;
 	}
 
-	Type* Pointer()
+	intptr_t PointerStart()
 	{
-		return pointer;
+		return start;
+	}
+
+	intptr_t PointerEnd()
+	{
+		return end;
 	}
 
 	friend MemoryPool<Type>;
@@ -81,7 +88,7 @@ template <typename Type>
 class MemoryPool
 {
 protected:
-	deque<MemoryBlock<Type>*> pool;
+	vector<MemoryBlock<Type>*> blocks;
 	size_t item_capacity;
 
 	MemoryPool(size_t item_capacity)
@@ -91,51 +98,43 @@ protected:
 
 public:
 	~MemoryPool()
-    { 
-        for(MemoryBlock<Type>* it : pool)
-            delete it;
-    }
-
-	void Push(Type* ptr)
 	{
-		bool prune = false;
-		auto it = pool.begin();
-		while(it != pool.end())
+		for(MemoryBlock<Type>* it : blocks)
+			delete it;
+	}
+
+	void Push(intptr_t ptr)
+	{
+		for(size_t i = 0; i < blocks.size(); i++)
 		{
-			MemoryBlock<Type>* block = *it;
-			Type* range_start = block->Pointer();
-			Type* range_end = block->Pointer() + item_capacity;
+			MemoryBlock<Type>* block = blocks[i];
+			intptr_t range_start = block->PointerStart();
+			intptr_t range_end = block->PointerEnd();
 
-			if(ptr > range_start && ptr < range_end)
+			if(ptr >= range_start && ptr <= range_end)
 			{
-				block->Push(ptr);
-				++it;
-				continue;
+				block->Push((Type*)ptr);
+                if(block->Available() == block->Capacity())
+                {
+                    delete block;
+                    blocks[i] = blocks.back();
+                    blocks.pop_back();
+                }
+				return;
 			}
-
-			if(block->Available() == block->Capacity())
-			{
-				if(prune)
-				{
-					it = pool.erase(it);
-					continue;
-				}
-				prune = true;
-			}
-			++it;
 		}
 	}
 
 	Type* Pop()
 	{
-		for(auto& block : pool)
+		for(auto& block : blocks)
 		{
 			if(block->Available() > 0)
 				return block->Pop();
 		}
 
 		MemoryBlock<Type>* new_block = new MemoryBlock<Type>(item_capacity);
-		pool.push_back(new_block);
+		blocks.push_back(new_block);
 		return new_block->Pop();
 	}
 
@@ -160,32 +159,27 @@ protected:
 	template <typename Type>
 	void Create(const string& key, size_t size_hint)
 	{
-		assert(pools.find(key) == pools.end());
-
-		size_t maxc = size_t(1048576) / sizeof(Type);
-		size_t defc = size_hint == 0 ? size_t(1048576) / sizeof(Type) : size_hint;
+		size_t maxc = size_t(2048576) / sizeof(Type);
+		size_t defc = size_hint == 0 ? size_t(2048576) / sizeof(Type) : size_hint;
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 
-		ManagedPool * managed_pool = new ManagedPool();
+		ManagedPool* managed_pool = new ManagedPool();
 		managed_pool->pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
 		managed_pool->push = [&](const string& key, intptr_t ptr) {
-			assert(pools.find(key) != pools.end());
 			MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(pools[key]->pool.get());
-			mp->Push((Type*)(ptr));
+			mp->Push(ptr);
 		};
 
 		pools.emplace(key, managed_pool);
 	}
 
 public:
-	MemoryManagerImpl()
-    {
-        for(auto &it : pools)
-        {
-            delete it.second;
-        }
-    }
+	~MemoryManagerImpl()
+	{
+		for(auto& it : pools)
+			delete it.second;
+	}
 
 	void Push(const string& key, intptr_t ptr)
 	{
@@ -214,8 +208,13 @@ public:
 	{
 		auto it = pools.begin();
 		while(it != pools.end())
+		{
 			if(it->second->counter == 0)
+			{
+				delete it->second;
 				it = pools.erase(it);
+			}
+		}
 	}
 
 	void SizeHint(const string& key, size_t hint)

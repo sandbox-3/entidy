@@ -196,7 +196,7 @@ public:
 		timer t2;
 		{
 			auto view = registry.view<Comp<2>, Comp<3>>();
-			view.each([&](auto e, auto comp2, auto comp3) {
+			view.each([&](auto e, auto &comp2, auto &comp3) {
 				comp2.a[0] = comp3.a[0];
 				if(RandProb(0.25))
 					registry.remove<Comp<2>>(e);
@@ -208,7 +208,7 @@ public:
 		timer t3;
 		{
 			auto view = registry.view<Comp<4>, Comp<5>>();
-			view.each([&](auto e, auto comp4, auto comp5) {
+			view.each([&](auto e, auto &comp4, auto &comp5) {
 				comp4.a[0] = comp5.a[0];
 				if(RandProb(0.25))
 					registry.remove_all(e);
@@ -218,7 +218,7 @@ public:
 		timer t4;
 		{
 			auto view = registry.view<Comp<1>>();
-			view.each([&](auto e, auto comp1) {
+			view.each([&](auto e, auto &comp1) {
 				comp1.a[0] = 1;
 				if(RandProb(0.25))
 					registry.remove_all(e);
@@ -264,7 +264,7 @@ int main(int argc, char** argv)
 {
 	using namespace entidy_benchmark;
 
-    size_t count = 10000000;
+    size_t count = 250000;
 
 	cout << "OURS" << endl;
 	{

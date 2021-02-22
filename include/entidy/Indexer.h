@@ -173,9 +173,13 @@ public:
 			auto map = maps[it->second];
 			if(map.entities.cardinality() == 0)
 			{
-				it = index.erase(it);
 				component_pool.push_back(it->second);
+				it = index.erase(it);
 			}
+            else
+            {
+                ++it;
+            }
 			map.entities.shrinkToFit();
 		}
 	}

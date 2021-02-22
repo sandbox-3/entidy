@@ -43,7 +43,7 @@ protected:
 public:
 	~MemoryBlock()
 	{
-		delete[] data;
+		delete []data;
 	}
 
 	size_t Capacity()
@@ -159,8 +159,8 @@ protected:
 	template <typename Type>
 	void Create(const string& key, size_t size_hint)
 	{
-		size_t maxc = size_t(2048576) / sizeof(Type);
-		size_t defc = size_hint == 0 ? size_t(2048576) / sizeof(Type) : size_hint;
+		size_t maxc = size_t(4 * 1024 * 1024) / sizeof(Type);
+		size_t defc = size_hint == 0 ? size_t(2 * 1024 * 1024) / sizeof(Type) : size_hint;
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 

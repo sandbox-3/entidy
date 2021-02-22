@@ -119,11 +119,15 @@ public:
 			auto it = query.Filter();
 			it.Each([&](Entity e, Comp<1>* comp1) {
 				comp1->a[0] = 1;
-				if(RandProb(0.25))
+				//if(RandProb(0.25))
 					registry->Erase(e);
 			});
 		}
 		t4.elapsed();
+
+    registry->CleanUp();
+    int a;
+    cin >> a;
 	}
 
 	virtual void Scenario2(unsigned int seed) override
@@ -220,11 +224,12 @@ public:
 			auto view = registry.view<Comp<1>>();
 			view.each([&](auto e, auto &comp1) {
 				comp1.a[0] = 1;
-				if(RandProb(0.25))
+				//if(RandProb(0.25))
 					registry.remove_all(e);
 			});
 		}
 		t4.elapsed();
+        
 	}
 
 	virtual void Scenario2(unsigned int seed) override
@@ -264,7 +269,7 @@ int main(int argc, char** argv)
 {
 	using namespace entidy_benchmark;
 
-    size_t count = 250000;
+    size_t count = 10000000;
 
 	cout << "OURS" << endl;
 	{

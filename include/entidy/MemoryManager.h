@@ -184,7 +184,6 @@ public:
 	void Push(const string& key, intptr_t ptr)
 	{
 		auto it = pools.find(key);
-		assert(it != pools.end());
 
 		it->second->push(key, ptr);
 		it->second->counter--;

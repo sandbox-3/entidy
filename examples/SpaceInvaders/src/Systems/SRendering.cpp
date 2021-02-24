@@ -54,7 +54,7 @@ void SRendering::RenderProjectiles(Engine engine)
 	ushort offset_x = (engine->Renderer()->Cols() - VIEWPORT_W) / 2;
 	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
 
-	auto projectile_view = engine->Entidy()->Select({"Position"}).Filter("Projectile");
+	auto projectile_view = engine->Entidy()->Select({"Position"}).Having("Position & Projectile");
 	projectile_view.Each([&](Entity e, Vec2f* position)
     {
 		    Pixel* p = engine->Renderer()->At(position->x + offset_x, position->y + offset_y);
@@ -73,7 +73,7 @@ void SRendering::RenderPlayer(Engine engine)
 	ushort offset_x = (engine->Renderer()->Cols() - VIEWPORT_W) / 2;
 	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
 
-	auto player_view = engine->Entidy()->Select({"Position"}).Filter("Player");
+	auto player_view = engine->Entidy()->Select({"Position"}).Having("Position & Player");
 	player_view.Each([&](Entity e, Vec2s* position)
     {
         ushort start_pos = offset_x + position->x;
@@ -109,11 +109,11 @@ void SRendering::RenderInvalidSize(Engine engine)
 void SRendering::RenderBackground(Engine engine)
 {
 	vector<Vec2f*> fx_fog_positions;
-	View view_fog = engine->Entidy()->Select({"Position"}).Filter("BGFXFog");
+	View view_fog = engine->Entidy()->Select({"Position"}).Having("Position & BGFXFog");
 	view_fog.Each([&](Entity e, Vec2f* position) { fx_fog_positions.push_back(position); });
 
 	vector<BGFXRipple*> fx_ripples;
-	View view_ripple = engine->Entidy()->Select({"BGFXRipple"}).Filter();
+	View view_ripple = engine->Entidy()->Select({"BGFXRipple"}).Having("BGFXRipple");
 	view_ripple.Each([&](Entity e, BGFXRipple* ripple) { fx_ripples.push_back(ripple); });
 
 	for(ushort x = 0; x < engine->Renderer()->Cols(); x++)

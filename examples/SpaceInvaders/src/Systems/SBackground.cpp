@@ -17,7 +17,7 @@ void SBackground::Init(Engine engine)
 
 void SBackground::Update(Engine engine)
 {
-	View view_ripple = engine->Entidy()->Select({"BGFXRipple"}).Filter("");
+	View view_ripple = engine->Entidy()->Select({"BGFXRipple"}).Having("BGFXRipple");
 	view_ripple.Each([&](Entity e, BGFXRipple* bgfxripple) {
         bgfxripple->intensity -= 0.03;
         bgfxripple->radius += 0.95;

@@ -75,7 +75,7 @@ public:
 		timer t1;
 		{
 			auto query = registry->Select({"Comp1"});
-			auto it = query.Filter();
+			auto it = query.Having("Comp1");
 			it.Each([&](Entity e, Comp<1>* comp1) {
 				comp1->a[0] = 1;
 				if(RandProb(0.25))
@@ -92,7 +92,7 @@ public:
 		timer t2;
 		{
 			auto query = registry->Select({"Comp2", "Comp3"});
-			auto it = query.Filter();
+			auto it = query.Having("Comp2 & Comp3");
 			it.Each([&](Entity e, Comp<2>* comp2, Comp<3>* comp3) {
 				comp2->a[0] = comp3->a[0];
 				if(RandProb(0.25))
@@ -105,7 +105,7 @@ public:
 		timer t3;
 		{
 			auto query = registry->Select({"Comp4", "Comp5"});
-			auto it = query.Filter();
+			auto it = query.Having("Comp4 & Comp5");
 			it.Each([&](Entity e, Comp<4>* comp4, Comp<5>* comp5) {
 				comp4->a[0] = comp5->a[0];
 				if(RandProb(0.25))
@@ -116,7 +116,7 @@ public:
 		timer t4;
 		{
 			auto query = registry->Select({"Comp1"});
-			auto it = query.Filter();
+			auto it = query.Having("Comp1");
 			it.Each([&](Entity e, Comp<1>* comp1) {
 				comp1->a[0] = 1;
 				//if(RandProb(0.25))
@@ -154,7 +154,7 @@ public:
 
 		timer t0;
 			auto query = registry->Select({"Comp1", "Comp3", "Comp5", "Comp7"});
-			auto it = query.Filter();
+			auto it = query.Having("Comp1 & Comp3 & Comp5 & Comp7");
 			it.Each([&](Entity e, Comp<1>* comp1, Comp<3>* comp3, Comp<5>* comp5, Comp<7>* comp7) {
 				comp1->a[0] = 1;
 			});

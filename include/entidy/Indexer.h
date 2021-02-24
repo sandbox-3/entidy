@@ -188,17 +188,11 @@ public:
 		BitMap query;
         
 		if(filter == "")
-		{
-			query = Evaluate(keys[0]);
-			for(size_t k = 1; k < keys.size(); k++)
-				query &= Evaluate(keys[k]);
-		}
-		else
-		{
-			query = qp.Parse(filter);
-			for(auto k : keys)
-				query &= Evaluate(k);
-		}
+            throw(EntidyException("No filter set"));
+        
+		query = qp.Parse(filter);
+		for(auto k : keys)
+			query &= Evaluate(k);
 
 		vector<SparseVector<1024>> results;
 		for(size_t k = 0; k < keys.size() + 1; k++)
@@ -225,7 +219,7 @@ public:
 				++it;
 			}
 		}
-
+        
 		return View(results);
 	}
 

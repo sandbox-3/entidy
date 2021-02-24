@@ -31,7 +31,7 @@ protected:
 	}
 
 public:
-	View Filter(const string& filter = "")
+	View Having(const string& filter)
 	{
 		return indexer->Fetch(select, filter);
 	}

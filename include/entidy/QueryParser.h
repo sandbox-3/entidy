@@ -136,8 +136,9 @@ namespace entidy
                 tokens.push_back(Token(key));
             }
             
-            if(tokens.size() == 0)
-                tokens.push_back(Token(query));
+            string key = query.substr(prev, query.size());
+            //if(tokens.size() == 0)
+                tokens.push_back(Token(key));
             
             return tokens;
         }

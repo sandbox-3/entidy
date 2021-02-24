@@ -13,10 +13,10 @@ void SPlayer::Init(Engine engine)
 void SPlayer::Update(Engine engine)
 {
 
-	auto input_cmd_view = engine->Entidy()->Select({"InputCommand"}).Filter();
+	auto input_cmd_view = engine->Entidy()->Select({"InputCommand"}).Having("InputCommand");
 	input_cmd_view.Each([&](Entity cmd_e, InputCommand* cmd) {
 
-		auto player_view = engine->Entidy()->Select({"Position"}).Filter("Player");
+		auto player_view = engine->Entidy()->Select({"Position"}).Having("Player");
 		player_view.Each([&](Entity player_e, Vec2s* position) {
             
 			if(*cmd == InputCommand::A)

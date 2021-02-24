@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <entidy/Registry.h>
-#include <entidy/PagedVector.h>
+#include <entidy/SparseVector.h>
 #include <entidy/Indexer.h>
 
 namespace entidy
@@ -15,9 +15,9 @@ class IndexerImpl;
 class View
 {
 protected:
-	vector<PagedVector<1024>> data;
+	vector<SparseVector<1024>> data;
 
-	View(const vector<PagedVector<1024>>& data)
+	View(const vector<SparseVector<1024>>& data)
 	{
 		this->data = data;
 	}
@@ -30,7 +30,7 @@ public:
 	template <class Ret, class Cls, class... Args>
 	struct lambda_type<Ret (Cls::*)(Args...) const>
 	{
-		vector<PagedVector<1024>> data;
+		vector<SparseVector<1024>> data;
 
 		template <size_t Nmax, size_t N, typename Head, typename... Rest>
 		constexpr std::tuple<Head, Rest...> Indirection(size_t index) const

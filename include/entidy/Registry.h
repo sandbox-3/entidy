@@ -82,6 +82,11 @@ public:
 		indexer->RemoveEntity(entity);
 	}
 
+    bool Has(Entity entity, const string &key)
+    {
+        return indexer->HasComponent(entity, key);
+    }
+
 	Query Select(const initializer_list<string>& keys)
 	{
 		return Query(indexer, keys);

@@ -6,6 +6,7 @@
 #include <entidy/Exception.h>
 #include <entidy/QueryParser.h>
 #include <entidy/View.h>
+#include <entidy/SparseVector.h>
 
 namespace entidy
 {
@@ -23,7 +24,7 @@ using Entity = size_t;
 struct ComponentMap
 {
 	BitMap entities;
-	PagedVector<1024> components;
+	SparseVector<1024> components;
 };
 
 class RegistryImpl;
@@ -60,22 +61,19 @@ protected:
 		{
 			c = componentRefCount++;
 			maps.emplace_back(ComponentMap());
-			maps.back().components = make_shared<PagedVectorImpl<1024>>(memory_manager);
+			maps.back().components = make_shared<SparseVectorImpl<1024>>(memory_manager);
 			index.emplace(key, c);
 		}
 		return c;
 	}
 
-	size_t ComponentIndex(const string& key, bool auto_create = true)
+	size_t ComponentIndex(const string& key)
 	{
 		auto it = index.find(key);
 		if(it != index.end())
 			return it->second;
 
-		if(auto_create)
-			return NewComponent(key);
-
-		throw(EntidyException("Key: " + key + " does not exist"));
+		return NewComponent(key);
 	}
     
 public:
@@ -202,9 +200,9 @@ public:
 				query &= Evaluate(k);
 		}
 
-		vector<PagedVector<1024>> results;
+		vector<SparseVector<1024>> results;
 		for(size_t k = 0; k < keys.size() + 1; k++)
-			results.push_back(make_shared<PagedVectorImpl<1024>>(memory_manager));
+			results.push_back(make_shared<SparseVectorImpl<1024>>(memory_manager));
 
 		size_t i = 0;
 		auto it = query.begin();
@@ -221,7 +219,7 @@ public:
 			it = query.begin();
 			while(it != query.end())
 			{
-				size_t c = ComponentIndex(keys[k], false);
+				size_t c = ComponentIndex(keys[k]);
 				results[k + 1]->Write(i, maps[c].components->Read(*it));
 				++i;
 				++it;
@@ -235,7 +233,7 @@ public:
 
 	virtual BitMap Evaluate(const string& token) override
 	{
-		size_t id = ComponentIndex(token, false);
+		size_t id = ComponentIndex(token);
         return maps[id].entities;
 	}
 

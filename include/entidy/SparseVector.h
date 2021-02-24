@@ -12,9 +12,9 @@ namespace entidy
 using namespace std;
 
 template <size_t PageSize>
-class PagedVectorImpl;
+class SparseVectorImpl;
 template <size_t PageSize>
-using PagedVector = shared_ptr<PagedVectorImpl<PageSize>>;
+using SparseVector = shared_ptr<SparseVectorImpl<PageSize>>;
 
 template <size_t Size>
 struct Page
@@ -24,7 +24,7 @@ struct Page
 };
 
 template <size_t PageSize>
-class PagedVectorImpl
+class SparseVectorImpl
 {
 protected:
 	vector<Page<PageSize>*> pages;
@@ -41,13 +41,13 @@ protected:
 
 public:
 
-	PagedVectorImpl(MemoryManager memory_manager)
+	SparseVectorImpl(MemoryManager memory_manager)
     { 
         this->memory_manager = memory_manager;
         this->key = "entidy::PagedVector(" + to_string(PageSize) + ")";
     }
 
-    ~PagedVectorImpl()
+    ~SparseVectorImpl()
     {
         for(size_t i = 0; i < pages.size(); i++)
         {
@@ -97,9 +97,12 @@ public:
         size_t page_index = std::floor(index / PageSize);
         size_t block_index = index - (page_index * PageSize);
         
-        if(pages[page_index] == nullptr)
+        if(pages.size() <= page_index) 
             return;
-        
+       
+        if(pages[page_index] == nullptr) 
+            return;
+
         intptr_t prev = pages[page_index]->data[block_index];
         pages[page_index]->data[block_index] = 0;
         if(prev != 0)

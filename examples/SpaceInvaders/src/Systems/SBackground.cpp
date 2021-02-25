@@ -8,8 +8,8 @@ void SBackground::Init(Engine engine)
 	for(int i = 0; i < 3; i++)
 	{
 		Entity e = engine->Entidy()->Create();
-		engine->Entidy()->Emplace<Vec2f>(e, "Position", Helper::RandInt(0, VIEWPORT_W), Helper::RandInt(0, VIEWPORT_H));
-		engine->Entidy()->Emplace<Vec2f>(e, "Velocity", Helper::RandDouble(-0.5, 0.5), Helper::RandDouble(-0.5, 0.5));
+		engine->Entidy()->Emplace<Vec2f>(e, "Position", VIEWPORT_W/2, VIEWPORT_H/2);
+		engine->Entidy()->Emplace<Vec2f>(e, "Velocity", Helper::RandDouble(-0.25, 0.25), Helper::RandDouble(-0.25, 0.25));
 		engine->Entidy()->Emplace<u_int8_t>(e, "BGFXFog");
 		engine->Entidy()->Emplace<BoundaryAction>(e, "BoundaryAction", BoundaryAction::BOUNCE);
 	}

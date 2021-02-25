@@ -46,7 +46,7 @@ void SRendering::Update(Engine engine)
 
 double SRendering::Distance(const Vec2f& p1, const Vec2f& p2)
 {
-	return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+	return sqrt( (p1.x - p2.x) * (p1.x - p2.x) + 3 * (p1.y - p2.y) * (p1.y - p2.y));
 }
 
 void SRendering::RenderProjectiles(Engine engine)

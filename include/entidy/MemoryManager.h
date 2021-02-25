@@ -114,7 +114,7 @@ public:
 			if(ptr >= range_start && ptr <= range_end)
 			{
 				block->Push((Type*)ptr);
-                if(block->Available() == block->Capacity())
+                if(block->Available() == block->Capacity() && blocks.size() > 1)
                 {
                     delete block;
                     blocks[i] = blocks.back();
@@ -153,18 +153,18 @@ protected:
 		std::function<void(const string& key, intptr_t ptr)> push;
 		size_t counter;
 	};
-	unordered_map<string, ManagedPool*> pools;
+	unordered_map<string, shared_ptr<ManagedPool>> pools;
 	unordered_map<string, size_t> hints;
 
 	template <typename Type>
-	void Create(const string& key, size_t size_hint)
+	shared_ptr<ManagedPool> Create(const string& key, size_t size_hint)
 	{
 		size_t maxc = size_t(4 * 1024 * 1024) / sizeof(Type);
 		size_t defc = size_hint == 0 ? size_t(2 * 1024 * 1024) / sizeof(Type) : size_hint;
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 
-		ManagedPool* managed_pool = new ManagedPool();
+		shared_ptr<ManagedPool> managed_pool = make_shared<ManagedPool>();
 		managed_pool->pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
 		managed_pool->push = [&](const string& key, intptr_t ptr) {
 			MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(pools[key]->pool.get());
@@ -172,13 +172,12 @@ protected:
 		};
 
 		pools.emplace(key, managed_pool);
+        return managed_pool;
 	}
 
 public:
 	~MemoryManagerImpl()
 	{
-		for(auto& it : pools)
-			delete it.second;
 	}
 
 	void Push(const string& key, intptr_t ptr)
@@ -192,15 +191,18 @@ public:
 	template <typename Type>
 	Type* Pop(const string& key)
 	{
+        shared_ptr<ManagedPool> mp;
+
 		auto it = pools.find(key);
 		if(it == pools.end())
-			Create<Type>(key, hints[key]);
+			mp = Create<Type>(key, hints[key]);
+        else
+            mp = it->second;
 
-		it = pools.find(key);
+		mp->counter++;
 
-		it->second->counter++;
-		MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(it->second->pool.get());
-		return mp->Pop();
+		MemoryPool<Type>* mempool = static_cast<MemoryPool<Type>*>(mp->pool.get());
+		return mempool->Pop();
 	}
 
 	void CleanUp()
@@ -209,10 +211,7 @@ public:
 		while(it != pools.end())
 		{
 			if(it->second->counter == 0)
-			{
-				delete it->second;
 				it = pools.erase(it);
-			}
 		}
 	}
 

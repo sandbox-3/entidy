@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <unistd.h>
 
 #include "entidy/Entidy.h"
 #include "entt.hpp"
@@ -283,12 +284,14 @@ int main(int argc, char** argv)
 		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
 		ours->Scenario1(1);
 	}
+    sleep(1);
 	cout << "ENTT" << endl;
 	{
 	    shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);
 	 	entt->Scenario1(1);
 	}
 
+    sleep(1);
 
 	cout << "Scenario 2" << endl;
 	cout << "OURS" << endl;
@@ -296,6 +299,7 @@ int main(int argc, char** argv)
 		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
 		ours->Scenario2(1);
 	}
+    sleep(1);
 	cout << "ENTT" << endl;
 	{
 	    shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);

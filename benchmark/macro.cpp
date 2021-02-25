@@ -151,7 +151,6 @@ public:
 	{
 		auto proba = UniformRandom<float>{seed};
 		auto registry = RegistryFactory::New();
-		auto t0 = timer{};
 
 		for(size_t i = 0; i < count; i++)
 		{
@@ -171,6 +170,7 @@ public:
 				registry->Emplace<Comp<7>>(e, "Comp7");
 		}
 
+		auto t0 = timer{};
 		auto query = registry->Select({"Comp1", "Comp3", "Comp5", "Comp7"});
 		auto it = query.Having("Comp1 & Comp3 & Comp5 & Comp7");
 		it.Each([&](Entity e, Comp<1>* comp1, Comp<3>* comp3, Comp<5>* comp5, Comp<7>* comp7) {
@@ -261,7 +261,6 @@ public:
 	{
 		auto proba = UniformRandom<float>{seed};
 		auto registry = entt::registry{};
-		auto t0 = timer{};
 
 		for(size_t i = 0; i < count; i++)
 		{
@@ -281,6 +280,7 @@ public:
 				registry.emplace<Comp<7>>(e);
 		}
 
+		auto t0 = timer{};
 		auto view = registry.view<Comp<1>, Comp<3>, Comp<5>, Comp<7>>();
 		view.each([&](auto e, auto& comp1, auto& comp3, auto& comp5, auto& comp7) {
 			comp1.a[0] = 1;

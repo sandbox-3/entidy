@@ -68,7 +68,6 @@ BraceWrapping: {
     SplitEmptyNamespace : 'true'
 }
 
-BreakAfterJavaFieldAnnotations: true
 BreakBeforeInheritanceComma: false
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
@@ -91,12 +90,8 @@ IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: true
 MacroBlockBegin: ''
 MacroBlockEnd:   ''
-JavaScriptQuotes: Double
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-ObjCBlockIndentWidth: 4
-ObjCSpaceAfterProperty: true
-ObjCSpaceBeforeProtocolList: true
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120

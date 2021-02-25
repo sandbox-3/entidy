@@ -1,12 +1,13 @@
 #pragma once
+
 #include <chrono>
+#include <deque>
 #include <entidy/Entidy.h>
 #include <future>
 #include <iostream>
-#include <unistd.h>
-#include <termios.h>
 #include <mutex>
-#include <deque>
+#include <termios.h>
+#include <unistd.h>
 #include <vector>
 
 #include "Console.h"
@@ -52,7 +53,7 @@ protected:
 	vector<shared_ptr<System>> systems;
 	double fps;
 
-    deque<char> input_buffer;
+	deque<char> input_buffer;
 
 	bool running = true;
 
@@ -84,31 +85,31 @@ public:
 		running = false;
 	}
 
-    char GetChar()
-    {
-        char buf = 0;
-        struct termios old = {0};
-        if (tcgetattr(0, &old) < 0)
-                perror("tcsetattr()");
-        old.c_lflag &= ~ICANON;
-        old.c_lflag &= ~ECHO;
-        old.c_cc[VMIN] = 1;
-        old.c_cc[VTIME] = 0;
-        if (tcsetattr(0, TCSANOW, &old) < 0)
-                perror("tcsetattr ICANON");
-        if (read(0, &buf, 1) < 0)
-                perror ("read()");
-        old.c_lflag |= ICANON;
-        old.c_lflag |= ECHO;
-        if (tcsetattr(0, TCSADRAIN, &old) < 0)
-                perror ("tcsetattr ~ICANON");
-        return (buf);
-    }
+	char GetChar()
+	{
+		char buf = 0;
+		struct termios old = {0};
+		if(tcgetattr(0, &old) < 0)
+			perror("tcsetattr()");
+		old.c_lflag &= ~ICANON;
+		old.c_lflag &= ~ECHO;
+		old.c_cc[VMIN] = 1;
+		old.c_cc[VTIME] = 0;
+		if(tcsetattr(0, TCSANOW, &old) < 0)
+			perror("tcsetattr ICANON");
+		if(read(0, &buf, 1) < 0)
+			perror("read()");
+		old.c_lflag |= ICANON;
+		old.c_lflag |= ECHO;
+		if(tcsetattr(0, TCSADRAIN, &old) < 0)
+			perror("tcsetattr ~ICANON");
+		return (buf);
+	}
 
-    deque<char>* InputBuffer()
-    {
-        return &input_buffer;
-    }
+	deque<char>* InputBuffer()
+	{
+		return &input_buffer;
+	}
 
 	void Run()
 	{
@@ -123,7 +124,7 @@ public:
 		{
 			if(future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
 			{
-                input_buffer.push_back(future.get());
+				input_buffer.push_back(future.get());
 				future = std::async(std::launch::async, &EngineImpl::GetChar, this);
 			}
 

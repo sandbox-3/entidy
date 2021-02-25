@@ -8,7 +8,6 @@
 
 #include <entidy/Exception.h>
 #include <entidy/Indexer.h>
-#include <entidy/MemoryManager.h>
 #include <entidy/Query.h>
 #include <entidy/View.h>
 
@@ -26,16 +25,18 @@ using Registry = shared_ptr<RegistryImpl>;
 class RegistryImpl : public enable_shared_from_this<RegistryImpl>
 {
 protected:
-	MemoryManager memory_manager;
 	Indexer indexer;
 
 	RegistryImpl()
 	{
-		memory_manager = make_shared<MemoryManagerImpl>();
 		indexer = make_shared<IndexerImpl>();
 	}
 
 public:
+	~RegistryImpl()
+	{
+	}
+
 	Entity Create()
 	{
 		return indexer->AddEntity();
@@ -44,40 +45,29 @@ public:
 	template <typename Type, typename... Args>
 	Type* Emplace(Entity entity, const string& key, Args&&... args)
 	{
-		Type* c = memory_manager->Pop<Type>(key);
+		Type* c = indexer->CreateComponent<Type>(entity, key);
 		new(c) Type(std::forward<Args>(args)...);
-
-		intptr_t prev = indexer->AddComponent(entity, key, (intptr_t)(c));
-		if(prev != 0)
-			memory_manager->Push(key, prev);
-
+        
 		return c;
 	}
 
 	template <typename Type>
 	Type* Emplace(Entity entity, const string& key, const Type& component)
 	{
-		Type* c = memory_manager->Pop<Type>(key);
+		Type* c = indexer->CreateComponent<Type>(entity, key);
 		memcpy(c, &component, sizeof(Type));
 
-		intptr_t prev = indexer->AddComponent(entity, key, (intptr_t)(c));
-		if(prev != 0)
-			memory_manager->Push(key, prev);
 		return c;
 	}
 
-	void Erase(Entity entity, const string& key)
+	bool Erase(Entity entity, const string& key)
 	{
-		intptr_t component = indexer->RemoveComponent(entity, key);
-		if(component != 0)
-			memory_manager->Push(key, component);
+		intptr_t prev = indexer->DeleteComponent(entity, key);
+		return prev != 0;
 	}
 
 	void Erase(Entity entity)
 	{
-		vector<pair<string, intptr_t>> components = indexer->GetAllComponents(entity);
-		for(auto& it : components)
-			memory_manager->Push(it.first, it.second);
 		indexer->RemoveEntity(entity);
 	}
 
@@ -99,12 +89,11 @@ public:
 
 	void SizeHint(const string& key, size_t size_hint)
 	{
-		memory_manager->SizeHint(key, size_hint);
+        // TODO : Size Hints
 	}
 
 	void CleanUp()
 	{
-		memory_manager->CleanUp();
 		indexer->CleanUp();
 	}
 

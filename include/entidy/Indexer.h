@@ -4,9 +4,10 @@
 
 #include <entidy/CRoaring/roaring.hh>
 #include <entidy/Exception.h>
+#include <entidy/MemoryManager.h>
 #include <entidy/QueryParser.h>
-#include <entidy/View.h>
 #include <entidy/SparseVector.h>
+#include <entidy/View.h>
 
 namespace entidy
 {
@@ -24,7 +25,8 @@ using Entity = size_t;
 struct ComponentMap
 {
 	BitMap entities;
-	SparseVector<1024> components;
+	SparseVector<DEFAULT_SV_SIZE> components;
+	MemoryManager mem_pool;
 };
 
 class RegistryImpl;
@@ -46,7 +48,7 @@ protected:
 	unordered_map<string, size_t> index;
 	vector<ComponentMap> maps;
 
-	MemoryManager memory_manager;
+	MemoryManager sv_mem_pool;
 
 	size_t NewComponent(const string& key)
 	{
@@ -61,7 +63,7 @@ protected:
 		{
 			c = componentRefCount++;
 			maps.emplace_back(ComponentMap());
-			maps.back().components = make_shared<SparseVectorImpl<1024>>(memory_manager);
+			maps.back().components = make_shared<SparseVectorImpl<DEFAULT_SV_SIZE>>(sv_mem_pool);
 			index.emplace(key, c);
 		}
 		return c;
@@ -75,11 +77,11 @@ protected:
 
 		return NewComponent(key);
 	}
-    
+
 public:
 	IndexerImpl()
 	{
-		memory_manager = make_shared<MemoryManagerImpl>();
+		sv_mem_pool = MemoryManagerImpl::Create<Page<DEFAULT_SV_SIZE>>();
 	}
 
 	bool HasEntity(Entity e)
@@ -114,7 +116,9 @@ public:
 		for(auto& map : maps)
 		{
 			map.entities.remove(entity);
-			map.components->Erase(entity);
+			intptr_t prev = map.components->Erase(entity);
+			if(prev != 0 && map.mem_pool)
+				map.mem_pool->Push(prev);
 		}
 
 		entity_pool.push_back(entity);
@@ -126,39 +130,38 @@ public:
 		return maps[c].entities.contains(e);
 	}
 
-	intptr_t AddComponent(Entity entity, const string& key, intptr_t component)
+	template <typename Type>
+	Type* CreateComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-        intptr_t prev = maps[c].components->Read(entity);
-		maps[c].components->Write(entity, component);
+
+        if(!maps[c].mem_pool)
+            maps[c].mem_pool = MemoryManagerImpl::Create<Type>();
+        
+		intptr_t prev = maps[c].components->Read(entity);
+		if(prev != 0)
+			maps[c].mem_pool->Push(prev);
+
+        Type * cur = maps[c].mem_pool->Pop<Type>();
+		maps[c].components->Write(entity, (intptr_t)cur);
 		maps[c].entities.add(entity);
-        return prev;
+		return cur;
 	}
 
-	intptr_t RemoveComponent(Entity entity, const string& key)
+	intptr_t DeleteComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
 		maps[c].entities.remove(entity);
-        return maps[c].components->Erase(entity);
+		intptr_t prev = maps[c].components->Erase(entity);
+		if(prev != 0 && maps[c].mem_pool)
+			maps[c].mem_pool->Push(prev);
+		return prev;
 	}
 
 	intptr_t GetComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
 		return maps[c].components->Read(entity);
-	}
-
-	vector<pair<string, intptr_t>> GetAllComponents(Entity entity)
-	{
-		vector<pair<string, intptr_t>> out;
-        for(auto &it : index)
-        {
-			auto &map = maps[it.second];
-            intptr_t ptr = map.components->Read(entity);
-            if(ptr != 0)
-                out.push_back(pair(it.first, ptr));
-        }
-		return out;
 	}
 
 	void CleanUp()
@@ -172,10 +175,10 @@ public:
 				component_pool.push_back(it->second);
 				it = index.erase(it);
 			}
-            else
-            {
-                ++it;
-            }
+			else
+			{
+				++it;
+			}
 			map.entities.shrinkToFit();
 		}
 	}
@@ -184,30 +187,30 @@ public:
 	{
 		QueryParser<BitMap> qp(this);
 		BitMap query;
-        
+
 		if(filter == "")
-            throw(EntidyException("No filter set"));
-        
+			throw(EntidyException("No filter set"));
+
 		query = qp.Parse(filter);
 		for(auto k : keys)
 			query &= Evaluate(k);
 
 		vector<SparseVector<DEFAULT_SV_SIZE>> results;
 		for(size_t k = 0; k < keys.size() + 1; k++)
-			results.push_back(make_shared<SparseVectorImpl<DEFAULT_SV_SIZE>>(memory_manager));
+			results.push_back(make_shared<SparseVectorImpl<DEFAULT_SV_SIZE>>(sv_mem_pool));
 
 		size_t i = 0;
 		auto it = query.begin();
 		while(it != query.end())
-        {
+		{
 			results[0]->Write(i, *it);
-            ++i;
-            ++it;
-        }
+			++i;
+			++it;
+		}
 
 		for(size_t k = 0; k < keys.size(); k++)
 		{
-		    i = 0;
+			i = 0;
 			it = query.begin();
 			while(it != query.end())
 			{
@@ -217,7 +220,7 @@ public:
 				++it;
 			}
 		}
-        
+
 		return View(results);
 	}
 
@@ -226,7 +229,7 @@ public:
 	virtual BitMap Evaluate(const string& token) override
 	{
 		size_t id = ComponentIndex(token);
-        return maps[id].entities;
+		return maps[id].entities;
 	}
 
 	virtual BitMap And(const BitMap& lhs, const BitMap& rhs) override

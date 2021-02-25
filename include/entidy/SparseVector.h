@@ -31,12 +31,11 @@ class SparseVectorImpl
 protected:
 	vector<Page<PageSize>*> pages;
 	MemoryManager memory_manager;
-	string key;
 	size_t size = 0;
 
 	Page<PageSize>* Pop()
 	{
-		Page<PageSize>* page = memory_manager->Pop<Page<PageSize>>(key);
+		Page<PageSize>* page = memory_manager->Pop<Page<PageSize>>();
 		new(page) Page<PageSize>();
 		return page;
 	}
@@ -45,7 +44,6 @@ public:
 	SparseVectorImpl(MemoryManager memory_manager)
 	{
 		this->memory_manager = memory_manager;
-		this->key = "entidy::PagedVector(" + to_string(PageSize) + ")";
 	}
 
 	~SparseVectorImpl()
@@ -53,7 +51,7 @@ public:
 		for(size_t i = 0; i < pages.size(); i++)
 		{
 			if(pages[i] != nullptr)
-				memory_manager->Push(key, (intptr_t)pages[i]);
+				memory_manager->Push((intptr_t)pages[i]);
 		}
 	}
 
@@ -69,10 +67,10 @@ public:
 		return pages[page_index]->data[block_index];
 	}
 
-	void Write(size_t index, intptr_t value)
+	intptr_t Write(size_t index, intptr_t value)
 	{
 		if(value == 0)
-			return;
+			return 0;
 
 		size_t page_index = std::floor(index / PageSize);
 
@@ -91,6 +89,8 @@ public:
 			pages[page_index]->count++;
 			++size;
 		}
+        
+        return prev;
 	}
 
 	intptr_t Erase(size_t index)
@@ -114,7 +114,7 @@ public:
 
 		if(pages[page_index]->count == 0)
 		{
-			memory_manager->Push(key, (intptr_t)(pages[page_index]));
+			memory_manager->Push((intptr_t)(pages[page_index]));
 			pages[page_index] = nullptr;
 		}
 

@@ -12,7 +12,7 @@ namespace entidy
 using namespace std;
 
 template <typename Type>
-class MemoryPool;
+class MemoryPoolImpl;
 
 template <typename Type>
 class MemoryBlock
@@ -79,25 +79,25 @@ public:
 		return end;
 	}
 
-	friend MemoryPool<Type>;
+    friend MemoryPoolImpl<Type>;
 };
 
 class MemoryManagerImpl;
 
 template <typename Type>
-class MemoryPool
+class MemoryPoolImpl
 {
 protected:
 	vector<MemoryBlock<Type>*> blocks;
 	size_t item_capacity;
 
-	MemoryPool(size_t item_capacity)
+	MemoryPoolImpl(size_t item_capacity)
 	{
 		this->item_capacity = item_capacity;
 	}
 
 public:
-	~MemoryPool()
+	~MemoryPoolImpl()
 	{
 		for(MemoryBlock<Type>* it : blocks)
 			delete it;
@@ -138,7 +138,7 @@ public:
 		return new_block->Pop();
 	}
 
-	friend MemoryManagerImpl;
+    friend MemoryManagerImpl;
 };
 
 class MemoryManagerImpl;
@@ -147,82 +147,45 @@ using MemoryManager = shared_ptr<MemoryManagerImpl>;
 class MemoryManagerImpl
 {
 protected:
-	struct ManagedPool
-	{
-		shared_ptr<void> pool;
-		std::function<void(const string& key, intptr_t ptr)> push;
-		size_t counter;
-	};
-	unordered_map<string, shared_ptr<ManagedPool>> pools;
-	unordered_map<string, size_t> hints;
-
+	shared_ptr<void> pool;
+	std::function<void(MemoryManagerImpl * sender, intptr_t ptr)> push;
+	size_t counter;
+ 
+public:       
 	template <typename Type>
-	shared_ptr<ManagedPool> Create(const string& key, size_t size_hint)
+	static shared_ptr<MemoryManagerImpl> Create(size_t size_hint = 0)
 	{
 		size_t maxc = size_t(4 * 1024 * 1024) / sizeof(Type);
 		size_t defc = size_hint == 0 ? size_t(2 * 1024 * 1024) / sizeof(Type) : size_hint;
 
 		size_t block_capacity = max(size_t(1), min(defc, maxc));
 
-		shared_ptr<ManagedPool> managed_pool = make_shared<ManagedPool>();
-		managed_pool->pool = shared_ptr<MemoryPool<Type>>(new MemoryPool<Type>(block_capacity));
-		managed_pool->push = [&](const string& key, intptr_t ptr) {
-			MemoryPool<Type>* mp = static_cast<MemoryPool<Type>*>(pools[key]->pool.get());
+		shared_ptr<MemoryManagerImpl> managed_pool(new MemoryManagerImpl());
+		managed_pool->pool = shared_ptr<MemoryPoolImpl<Type>>(new MemoryPoolImpl<Type>(block_capacity));
+		managed_pool->push = [&](MemoryManagerImpl * sender, intptr_t ptr) {
+			MemoryPoolImpl<Type>* mp = static_cast<MemoryPoolImpl<Type>*>(sender->pool.get());
 			mp->Push(ptr);
 		};
-
-		pools.emplace(key, managed_pool);
         return managed_pool;
 	}
 
-public:
 	~MemoryManagerImpl()
 	{
 	}
 
-	void Push(const string& key, intptr_t ptr)
+	void Push(intptr_t ptr)
 	{
-		auto it = pools.find(key);
-
-		it->second->push(key, ptr);
-		it->second->counter--;
+		push(this, ptr);
+		counter--;
 	}
 
 	template <typename Type>
-	Type* Pop(const string& key)
+	Type* Pop()
 	{
-        shared_ptr<ManagedPool> mp;
+		counter++;
 
-		auto it = pools.find(key);
-		if(it == pools.end())
-			mp = Create<Type>(key, hints[key]);
-        else
-            mp = it->second;
-
-		mp->counter++;
-
-		MemoryPool<Type>* mempool = static_cast<MemoryPool<Type>*>(mp->pool.get());
+		MemoryPoolImpl<Type>* mempool = static_cast<MemoryPoolImpl<Type>*>(pool.get());
 		return mempool->Pop();
-	}
-
-	void CleanUp()
-	{
-		auto it = pools.begin();
-		while(it != pools.end())
-		{
-			if(it->second->counter == 0)
-				it = pools.erase(it);
-		}
-	}
-
-	void SizeHint(const string& key, size_t hint)
-	{
-		hints.emplace(key, hint);
-	}
-
-	bool HasKey(const string& key)
-	{
-		return pools.find(key) != pools.end();
 	}
 };
 } // namespace entidy

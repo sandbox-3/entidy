@@ -1,275 +1,277 @@
 #pragma once
 #include <deque>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <entidy/Exception.h>
 
 namespace entidy
 {
-    using namespace std;
+using namespace std;
 
-    template <typename Type>
-    class QueryParserAdapter
-    {
-    public:
-        virtual Type Evaluate(const string &token) = 0;
-        virtual Type And(const Type &lhs, const Type &rhs) = 0;
-        virtual Type Or(const Type &lhs, const Type &rhs) = 0;
-        virtual Type Not(const Type &rhs) = 0;
-    };
+template <typename Type>
+class QueryParserAdapter
+{
+public:
+	virtual Type Evaluate(const string& token) = 0;
+	virtual Type And(const Type& lhs, const Type& rhs) = 0;
+	virtual Type Or(const Type& lhs, const Type& rhs) = 0;
+	virtual Type Not(const Type& rhs) = 0;
+};
 
-    enum TokenType
-    {
-        Nil,
-        And,
-        Or,
-        Not,
-        BlockStart,
-        BlockEnd,
-        Leaf
-    };
+enum TokenType
+{
+	Nil,
+	And,
+	Or,
+	Not,
+	BlockStart,
+	BlockEnd,
+	Leaf
+};
 
-    class Token
-    {
-    public:
-        string key;
-        TokenType op;
-        vector<Token> children;
+class Token
+{
+public:
+	string key;
+	TokenType op;
+	vector<Token> children;
 
-        Token()
-        {
-        }
+	Token() { }
 
-        Token(const string &key)
-        {
-            op = Parse(key);
-        }
+	Token(const string& key)
+	{
+		op = Parse(key);
+	}
 
-        TokenType Parse(const string &key)
-        {
-            this->key = key;
-            if (key == " ")
-                return TokenType::Nil;
-            else if (key == "&")
-                return TokenType::And;
-            else if (key == "|")
-                return TokenType::Or;
-            else if (key == "!")
-                return TokenType::Not;
-            else if (key == "(")
-                return TokenType::BlockStart;
-            else if (key == ")")
-                return TokenType::BlockEnd;
-            else
-                return TokenType::Leaf;
-        }
+	TokenType Parse(const string& key)
+	{
+		this->key = key;
+		if(key == " ")
+			return TokenType::Nil;
+		else if(key == "&")
+			return TokenType::And;
+		else if(key == "|")
+			return TokenType::Or;
+		else if(key == "!")
+			return TokenType::Not;
+		else if(key == "(")
+			return TokenType::BlockStart;
+		else if(key == ")")
+			return TokenType::BlockEnd;
+		else
+			return TokenType::Leaf;
+	}
 
-        bool Valid()
-        {
-            switch (op)
-            {
-            case TokenType::And:
-            case TokenType::Or:
-            {
-                if (children.size() != 2)
-                    return false;
-                return children[0].Valid() && children[1].Valid();
-            }
-            case TokenType::Not:
-            {
-                if (children.size() != 1)
-                    return false;
-                return children[0].Valid();
-            }
-            case TokenType::Leaf:
-                return true;
-            };
+	bool Valid()
+	{
+		switch(op)
+		{
+		case TokenType::And:
+		case TokenType::Or: {
+			if(children.size() != 2)
+				return false;
+			return children[0].Valid() && children[1].Valid();
+		}
+		case TokenType::Not: {
+			if(children.size() != 1)
+				return false;
+			return children[0].Valid();
+		}
+		case TokenType::Leaf:
+			return true;
+		};
 
-            return false;
-        }
+		return false;
+	}
 
-        template <typename Type>
-        Type Evaluate(QueryParserAdapter<Type>* adapter)
-        {
-            if (op == TokenType::Leaf)
-                return adapter->Evaluate(key);
+	template <typename Type>
+	Type Evaluate(QueryParserAdapter<Type>* adapter)
+	{
+		if(op == TokenType::Leaf)
+			return adapter->Evaluate(key);
 
-            if (op == TokenType::And)
-                return adapter->And(children[0].Evaluate(adapter), children[1].Evaluate(adapter));
+		if(op == TokenType::And)
+			return adapter->And(children[0].Evaluate(adapter), children[1].Evaluate(adapter));
 
-            if (op == TokenType::Or)
-                return adapter->Or(children[0].Evaluate(adapter), children[1].Evaluate(adapter));
+		if(op == TokenType::Or)
+			return adapter->Or(children[0].Evaluate(adapter), children[1].Evaluate(adapter));
 
-            if (op == TokenType::Not)
-                return adapter->Not(children[0].Evaluate(adapter));
-            
-            throw EntidyException("Bad Token: " + key);
-        }
-    };
+		if(op == TokenType::Not)
+			return adapter->Not(children[0].Evaluate(adapter));
 
-    template <typename Type>
-    class QueryParser
-    {
-    protected:
-        QueryParserAdapter<Type>* adapter;
+		throw EntidyException("Bad Token: " + key);
+	}
+};
 
-        deque<Token> Tokenize(const string &query)
-        {
-            std::string const delims{" ()&|!"};
-            deque<Token> tokens;
+template <typename Type>
+class QueryParser
+{
+protected:
+	QueryParserAdapter<Type>* adapter;
 
-            size_t prev = 0, pos = 0;
-            while ((pos = query.find_first_of(delims, prev)) != std::string::npos)
-            {
-                if (pos == prev)
-                {
-                    string cur = query.substr(pos, 1);
-                    if (cur != " ")
-                        tokens.push_back(Token(cur));
-                    ++prev;
-                    continue;
-                }
+	deque<Token> Tokenize(const string& query)
+	{
+		std::string const delims{" ()&|!"};
+		deque<Token> tokens;
 
-                string key = query.substr(prev, pos - prev);
-                prev = pos;
-                tokens.push_back(Token(key));
-            }
-            
-            string key = query.substr(prev, query.size());
-            //if(tokens.size() == 0)
-                tokens.push_back(Token(key));
-            
-            return tokens;
-        }
+		size_t prev = 0, pos = 0;
+		while((pos = query.find_first_of(delims, prev)) != std::string::npos)
+		{
+			if(pos == prev)
+			{
+				string cur = query.substr(pos, 1);
+				if(cur != " ")
+					tokens.push_back(Token(cur));
+				++prev;
+				continue;
+			}
 
-        bool ParseBlocks(deque<Token> &tokens)
-        {
-            auto it = tokens.begin();
-            while (it < tokens.end() - 2)
-            {
-                auto prev = it;
-                auto cur = it + 1;
-                auto next = it + 2;
+			string key = query.substr(prev, pos - prev);
+			prev = pos;
+			tokens.push_back(Token(key));
+		}
 
-                if (prev->op == TokenType::BlockStart && next->op == TokenType::BlockEnd)
-                {
-                    it = tokens.erase(prev);
-                    tokens.erase(it + 1);
-                    return true;
-                }
+		string key = query.substr(prev, query.size());
+		//if(tokens.size() == 0)
+		tokens.push_back(Token(key));
 
-                if (prev->op == TokenType::BlockStart && cur->op == TokenType::BlockEnd)
-                {
-                    it = tokens.erase(prev);
-                    tokens.erase(it);
-                    return true;
-                }
+		return tokens;
+	}
 
-                if (cur->op == TokenType::BlockStart && next->op == TokenType::BlockEnd)
-                {
-                    it = tokens.erase(cur);
-                    tokens.erase(it);
-                    return true;
-                }
-                ++it;
-            }
-            return false;
-        }
+	bool ParseBlocks(deque<Token>& tokens)
+	{
+		if(tokens.size() < 3)
+			return false;
 
-        bool ParseNot(deque<Token> &tokens)
-        {
-            auto it = tokens.begin();
-            while (it < tokens.end() - 1)
-            {
-                auto prev = it;
-                auto cur = it + 1;
+		auto it = tokens.begin();
+		while(it < tokens.end() - 2)
+		{
+			auto prev = it;
+			auto cur = it + 1;
+			auto next = it + 2;
 
-                if (prev->op == TokenType::Not && cur->Valid() && !prev->Valid())
-                {
-                    prev->children.push_back(*cur);
-                    tokens.erase(cur);
-                    return true;
-                }
+			if(prev->op == TokenType::BlockStart && next->op == TokenType::BlockEnd)
+			{
+				it = tokens.erase(prev);
+				tokens.erase(it + 1);
+				return true;
+			}
 
-                ++it;
-            }
-            return false;
-        }
+			if(prev->op == TokenType::BlockStart && cur->op == TokenType::BlockEnd)
+			{
+				it = tokens.erase(prev);
+				tokens.erase(it);
+				return true;
+			}
 
-        bool ParseAndOr(deque<Token> &tokens, bool op)
-        {
-            auto it = tokens.begin();
-            while (it < tokens.end() - 2)
-            {
-                auto prev = it;
-                auto cur = it + 1;
-                auto next = it + 2;
+			if(cur->op == TokenType::BlockStart && next->op == TokenType::BlockEnd)
+			{
+				it = tokens.erase(cur);
+				tokens.erase(it);
+				return true;
+			}
+			++it;
+		}
+		return false;
+	}
 
-                if (((op && cur->op == TokenType::And) || (!op && cur->op == TokenType::Or)) && !cur->Valid())
-                {
-                    if (prev->Valid() && next->Valid())
-                    {
-                        cur->children.push_back(*prev);
-                        cur->children.push_back(*next);
-                        it = tokens.erase(prev);
-                        tokens.erase(it + 1);
-                        return true;
-                    }
-                }
-                ++it;
-            }
+	bool ParseNot(deque<Token>& tokens)
+	{
+		auto it = tokens.begin();
+		while(it < tokens.end() - 1)
+		{
+			auto prev = it;
+			auto cur = it + 1;
 
-            return false;
-        }
+			if(prev->op == TokenType::Not && cur->Valid() && !prev->Valid())
+			{
+				prev->children.push_back(*cur);
+				tokens.erase(cur);
+				return true;
+			}
 
-        bool BuildTree(deque<Token> &tokens)
-        {
-            bool operate = false;
-            bool done = false;
-            while (!done)
-            {
-                done = true;
+			++it;
+		}
+		return false;
+	}
 
-                while (ParseBlocks(tokens))
-                    done = false;
+	bool ParseAndOr(deque<Token>& tokens, bool op)
+	{
+		if(tokens.size() < 3)
+			return false;
 
-                if (!done)
-                    continue;
+		auto it = tokens.begin();
+		while(it < tokens.end() - 2)
+		{
+			auto prev = it;
+			auto cur = it + 1;
+			auto next = it + 2;
 
-                while (ParseNot(tokens))
-                    done = false;
+			if(((op && cur->op == TokenType::And) || (!op && cur->op == TokenType::Or)) && !cur->Valid())
+			{
+				if(prev->Valid() && next->Valid())
+				{
+					cur->children.push_back(*prev);
+					cur->children.push_back(*next);
+					it = tokens.erase(prev);
+					tokens.erase(it + 1);
+					return true;
+				}
+			}
+			++it;
+		}
 
-                if (!done)
-                    continue;
+		return false;
+	}
 
-                while (ParseAndOr(tokens, true))
-                    done = false;
+	bool BuildTree(deque<Token>& tokens)
+	{
+		bool operate = false;
+		bool done = false;
+		while(!done)
+		{
+			done = true;
 
-                if (!done)
-                    continue;
+			while(ParseBlocks(tokens))
+				done = false;
 
-                if (ParseAndOr(tokens, false))
-                    done = false;
-            }
+			if(!done)
+				continue;
 
-            return tokens.size() == 1;
-        }
+			while(ParseNot(tokens))
+				done = false;
 
-    public:
-        QueryParser(QueryParserAdapter<Type>* adapter)
-        {
-            this->adapter = adapter;
-        }
+			if(!done)
+				continue;
 
-        Type Parse(const string &query)
-        {
-            auto tokens = Tokenize(query);
-            if (!BuildTree(tokens))
-                throw EntidyException("Bad Query; Check syntax: " + query);
+			while(ParseAndOr(tokens, true))
+				done = false;
 
-            return tokens.front().Evaluate(adapter);
-        }
-    };
+			if(!done)
+				continue;
+
+			if(ParseAndOr(tokens, false))
+				done = false;
+		}
+
+		return tokens.size() == 1;
+	}
+
+public:
+	QueryParser(QueryParserAdapter<Type>* adapter)
+	{
+		this->adapter = adapter;
+	}
+
+	Type Parse(const string& query)
+	{
+		auto tokens = Tokenize(query);
+		if(!BuildTree(tokens))
+			throw EntidyException("Bad Query; Check syntax: " + query);
+
+		return tokens.front().Evaluate(adapter);
+	}
+};
 
 } // namespace entidy

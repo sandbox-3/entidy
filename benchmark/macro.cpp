@@ -94,7 +94,8 @@ public:
 			auto query = registry->Select({"Comp2", "Comp3"});
 			auto it = query.Having("Comp2 & Comp3");
 			it.Each([&](Entity e, Comp<2>* comp2, Comp<3>* comp3) {
-				comp2->a[0] = comp3->a[0];
+				comp2->a[0] = 1;
+				comp3->a[0] = 1;
 				if(RandProb(0.25))
 					registry->Erase(e, "Comp2");
 				if(RandProb(0.25))
@@ -107,7 +108,8 @@ public:
 			auto query = registry->Select({"Comp4", "Comp5"});
 			auto it = query.Having("Comp4 & Comp5");
 			it.Each([&](Entity e, Comp<4>* comp4, Comp<5>* comp5) {
-				comp4->a[0] = comp5->a[0];
+				comp4->a[0] = 1;
+				comp5->a[0] = 1;
 				if(RandProb(0.25))
 					registry->Erase(e);
 			});
@@ -124,10 +126,6 @@ public:
 			});
 		}
 		t4.elapsed();
-
-    registry->CleanUp();
-    int a;
-    cin >> a;
 	}
 
 	virtual void Scenario2(unsigned int seed) override
@@ -157,6 +155,9 @@ public:
 			auto it = query.Having("Comp1 & Comp3 & Comp5 & Comp7");
 			it.Each([&](Entity e, Comp<1>* comp1, Comp<3>* comp3, Comp<5>* comp5, Comp<7>* comp7) {
 				comp1->a[0] = 1;
+				comp3->a[0] = 1;
+				comp5->a[0] = 1;
+				comp7->a[0] = 1;
 			});
 		t0.elapsed();
 	}
@@ -184,7 +185,7 @@ public:
 		timer t1;
 		{
 			auto view = registry.view<Comp<1>>();
-			view.each([&](auto e, auto comp1) {
+			view.each([&](auto e, auto &comp1) {
 				comp1.a[0] = 1;
 				if(RandProb(0.25))
 					registry.emplace<Comp<2>>(e);
@@ -201,7 +202,8 @@ public:
 		{
 			auto view = registry.view<Comp<2>, Comp<3>>();
 			view.each([&](auto e, auto &comp2, auto &comp3) {
-				comp2.a[0] = comp3.a[0];
+				comp2.a[0] = 1;
+				comp3.a[0] = 1;
 				if(RandProb(0.25))
 					registry.remove<Comp<2>>(e);
 				if(RandProb(0.25))
@@ -213,7 +215,8 @@ public:
 		{
 			auto view = registry.view<Comp<4>, Comp<5>>();
 			view.each([&](auto e, auto &comp4, auto &comp5) {
-				comp4.a[0] = comp5.a[0];
+				comp4.a[0] = 1;
+				comp5.a[0] = 1;
 				if(RandProb(0.25))
 					registry.remove_all(e);
 			});
@@ -259,6 +262,9 @@ public:
 			auto view = registry.view<Comp<1>, Comp<3>, Comp<5>, Comp<7>>();
 			view.each([&](auto e, auto &comp1, auto &comp3, auto &comp5, auto &comp7) {
 				comp1.a[0] = 1;
+				comp3.a[0] = 1;
+				comp5.a[0] = 1;
+				comp7.a[0] = 1;
 			});
 		t0.elapsed();
 	}
@@ -271,6 +277,7 @@ int main(int argc, char** argv)
 
     size_t count = 10000000;
 
+	cout << "Scenario 1" << endl;
 	cout << "OURS" << endl;
 	{
 		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
@@ -280,6 +287,19 @@ int main(int argc, char** argv)
 	{
 	    shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);
 	 	entt->Scenario1(1);
+	}
+
+
+	cout << "Scenario 2" << endl;
+	cout << "OURS" << endl;
+	{
+		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
+		ours->Scenario2(1);
+	}
+	cout << "ENTT" << endl;
+	{
+	    shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);
+	 	entt->Scenario2(1);
 	}
 	return 0;
 }

@@ -138,10 +138,8 @@ public:
 	intptr_t RemoveComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-        intptr_t prev = maps[c].components->Read(entity);
-		maps[c].components->Erase(entity);
 		maps[c].entities.remove(entity);
-        return prev;
+        return maps[c].components->Erase(entity);
 	}
 
 	intptr_t GetComponent(Entity entity, const string& key)
@@ -194,9 +192,9 @@ public:
 		for(auto k : keys)
 			query &= Evaluate(k);
 
-		vector<SparseVector<1024>> results;
+		vector<SparseVector<DEFAULT_SV_SIZE>> results;
 		for(size_t k = 0; k < keys.size() + 1; k++)
-			results.push_back(make_shared<SparseVectorImpl<1024>>(memory_manager));
+			results.push_back(make_shared<SparseVectorImpl<DEFAULT_SV_SIZE>>(memory_manager));
 
 		size_t i = 0;
 		auto it = query.begin();

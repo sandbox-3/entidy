@@ -9,6 +9,8 @@
 
 namespace entidy
 {
+#define DEFAULT_SV_SIZE 512
+
 using namespace std;
 
 template <size_t PageSize>
@@ -74,7 +76,6 @@ public:
             return;
         
         size_t page_index = std::floor(index / PageSize);
-        size_t block_index = index - (page_index * PageSize);
 
         while(page_index >= pages.size())
             pages.push_back(nullptr);
@@ -82,6 +83,7 @@ public:
         if(pages[page_index] == nullptr)
             pages[page_index] = Pop();
         
+        size_t block_index = index - (page_index * PageSize);
         intptr_t prev = pages[page_index]->data[block_index];
         pages[page_index]->data[block_index] = value;
 
@@ -92,17 +94,17 @@ public:
         }
     }
 
-    void Erase(size_t index)
+    intptr_t Erase(size_t index)
     {
         size_t page_index = std::floor(index / PageSize);
-        size_t block_index = index - (page_index * PageSize);
         
-        if(pages.size() <= page_index) 
-            return;
+        if(page_index >= pages.size())
+            return 0;
        
         if(pages[page_index] == nullptr) 
-            return;
+            return 0;
 
+        size_t block_index = index - (page_index * PageSize);
         intptr_t prev = pages[page_index]->data[block_index];
         pages[page_index]->data[block_index] = 0;
         if(prev != 0)
@@ -116,6 +118,8 @@ public:
             memory_manager->Push(key, (intptr_t)(pages[page_index]));
             pages[page_index] = nullptr;
         }
+
+        return prev;
     }
     
     size_t Size() const

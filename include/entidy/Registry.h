@@ -48,9 +48,9 @@ public:
 		new(c) Type(std::forward<Args>(args)...);
 
 		intptr_t prev = indexer->AddComponent(entity, key, (intptr_t)(c));
-        if(prev != 0)
-            memory_manager->Push(key, prev);
-        
+		if(prev != 0)
+			memory_manager->Push(key, prev);
+
 		return c;
 	}
 
@@ -61,17 +61,16 @@ public:
 		memcpy(c, &component, sizeof(Type));
 
 		intptr_t prev = indexer->AddComponent(entity, key, (intptr_t)(c));
-        if(prev != 0)
-            memory_manager->Push(key, prev);
+		if(prev != 0)
+			memory_manager->Push(key, prev);
 		return c;
 	}
 
 	void Erase(Entity entity, const string& key)
 	{
-		intptr_t component = indexer->GetComponent(entity, key);
-        if(component != 0)
-		    memory_manager->Push(key, component);
-		indexer->RemoveComponent(entity, key);
+		intptr_t component = indexer->RemoveComponent(entity, key);
+		if(component != 0)
+			memory_manager->Push(key, component);
 	}
 
 	void Erase(Entity entity)
@@ -82,10 +81,10 @@ public:
 		indexer->RemoveEntity(entity);
 	}
 
-    bool Has(Entity entity, const string &key)
-    {
-        return indexer->HasComponent(entity, key);
-    }
+	bool Has(Entity entity, const string& key)
+	{
+		return indexer->HasComponent(entity, key);
+	}
 
 	Query Select(const initializer_list<string>& keys)
 	{
@@ -95,9 +94,6 @@ public:
 	template <typename Type>
 	Type* Component(Entity entity, const string& key)
 	{
-		if(!indexer->HasComponent(entity, key))
-			throw EntidyException("Entity: " + to_string(entity) + " does not have component: " + key);
-
 		return (Type*)indexer->GetComponent(entity, key);
 	}
 

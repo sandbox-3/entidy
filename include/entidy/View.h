@@ -10,14 +10,17 @@
 namespace entidy
 {
 using namespace std;
+
+using Entity = size_t;
+
 class IndexerImpl;
 
 class View
 {
 protected:
-	vector<SparseVector<1024>> data;
+	vector<SparseVector<DEFAULT_SV_SIZE>> data;
 
-	View(const vector<SparseVector<1024>>& data)
+	View(const vector<SparseVector<DEFAULT_SV_SIZE>>& data)
 	{
 		this->data = data;
 	}
@@ -30,7 +33,7 @@ public:
 	template <class Ret, class Cls, class... Args>
 	struct lambda_type<Ret (Cls::*)(Args...) const>
 	{
-		vector<SparseVector<1024>> data;
+		vector<SparseVector<DEFAULT_SV_SIZE>> data;
 
 		template <size_t Nmax, size_t N, typename Head, typename... Rest>
 		constexpr std::tuple<Head, Rest...> Indirection(size_t index) const
@@ -70,6 +73,22 @@ public:
 			std::apply(fn, lt.Get(index));
 		}
 	}
+
+    size_t Size() const
+    {
+        return data[0]->Size();
+    }
+
+	template <typename Type>
+    Type* At(size_t row, size_t col)
+    {
+        return static_cast<Type*>(data[col+1]->Read(row));
+    }
+
+    Entity At(size_t row)
+    {
+        return static_cast<Entity>(data[0]->Read(row));
+    }
 
 	friend IndexerImpl;
 };

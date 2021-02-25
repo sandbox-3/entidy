@@ -15,7 +15,7 @@ namespace entidy
 {
 using namespace std;
 
-using Entity = size_t;
+using Entity = uint32_t;
 
 class RegistryFactory;
 

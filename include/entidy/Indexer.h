@@ -12,15 +12,11 @@
 namespace entidy
 {
 
-#ifdef ENTIDY_32_BIT
 using BitMap = Roaring;
-#else
-using BitMap = Roaring64Map;
-#endif
 
 using namespace std;
 
-using Entity = size_t;
+using Entity = uint32_t;
 
 struct ComponentMap
 {

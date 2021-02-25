@@ -320,7 +320,7 @@ int main(int argc, char** argv)
 		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
 		ours->Scenario2(1);
 	}
-	std::this_thread::sleep_for(10s);
+	std::this_thread::sleep_for(1s);
 	cout << "ENTT" << endl;
 	{
 		shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);

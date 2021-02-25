@@ -1,6 +1,6 @@
 find_package(Threads REQUIRED)
 
-add_executable(micro micro.cpp)
+add_executable(micro micro.cpp catch2/catch.cpp)
 add_executable(macro macro.cpp)
 
 target_include_directories(micro PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/benchmark>)

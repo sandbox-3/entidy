@@ -1,4 +1,3 @@
-
 #include <iostream>
 
 #include <entidy/CRoaring/roaring.hh>
@@ -96,67 +95,65 @@ private:
 
 struct A
 {
-    size_t a [256];
+	size_t a[256];
 };
 
 int main()
 {
-    size_t data_size = 256;
-    size_t count = 1000000000;
+	size_t data_size = 256;
+	size_t count = 1000000000;
 
-    vector<shared_ptr<A>> sa;
-    vector<A*>pa;
+	vector<shared_ptr<A>> sa;
+	vector<A*> pa;
 
-    for(size_t i = 0; i < 10000; i++)
-    {
-        sa.push_back(make_shared<A>());
-        pa.push_back(new A());
-    }
+	for(size_t i = 0; i < 10000; i++)
+	{
+		sa.push_back(make_shared<A>());
+		pa.push_back(new A());
+	}
 
-    timer t0;
-    for(size_t i = 0; i < count; i++)
-        pa[i % 10000]->a[i % data_size] = i;
-    t0.elapsed();
+	timer t0;
+	for(size_t i = 0; i < count; i++)
+		pa[i % 10000]->a[i % data_size] = i;
+	t0.elapsed();
 
-    timer t1;
-    for(size_t i = 0; i < count; i++)
-        sa[i % 10000]->a[i % data_size] = i;
-    t1.elapsed();
+	timer t1;
+	for(size_t i = 0; i < count; i++)
+		sa[i % 10000]->a[i % data_size] = i;
+	t1.elapsed();
 
+	MemoryManager memory = make_shared<MemoryManagerImpl>();
+	PagedVector<1024> pv = make_shared<PagedVectorImpl<1024>>(memory);
+	for(int i = 0; i < 1000000; i++)
+		pv->Write(i, i);
 
-    MemoryManager memory = make_shared<MemoryManagerImpl>();
-    PagedVector<1024> pv = make_shared<PagedVectorImpl<1024>>(memory);
-    for(int i = 0; i < 1000000; i++)
-        pv->Write(i, i);
+	for(int i = 0; i < 1000000; i++)
+		if(pv->Read(i) != i)
+			cout << "mismatch: " << i << endl;
 
-    for(int i = 0; i < 1000000; i++)
-        if(pv->Read(i) != i)
-            cout << "mismatch: " << i << endl;
-    
-    for(int i = 0; i < 1000; i++)
-        if(rand() % 100 < 80)
-            pv->Erase(i);
-    
-    for(int i = 1000; i < 1000000; i++)
-        if(rand() % 100 < 80)
-            pv->Erase(i);
-    
-    for(int i = 0; i < 1000000; i++)
-        if(rand() % 100 < 80)
-            pv->Erase(i);
-    
-    for(int i = 0; i < 1000000; i++)
-        if(rand() % 100 < 80)
-            pv->Erase(i);
+	for(int i = 0; i < 1000; i++)
+		if(rand() % 100 < 80)
+			pv->Erase(i);
 
-    for(int i = 0; i < 1000000; i++)
-        if(rand() % 100 < 80)
-            pv->Erase(i);
-            
-    for(int i = 0; i < 1000000; i++)
-        if(pv->Read(i) != i && pv->Read(1) != 0)
-            cout << "mismatch: " << i << endl;
-    
+	for(int i = 1000; i < 1000000; i++)
+		if(rand() % 100 < 80)
+			pv->Erase(i);
+
+	for(int i = 0; i < 1000000; i++)
+		if(rand() % 100 < 80)
+			pv->Erase(i);
+
+	for(int i = 0; i < 1000000; i++)
+		if(rand() % 100 < 80)
+			pv->Erase(i);
+
+	for(int i = 0; i < 1000000; i++)
+		if(rand() % 100 < 80)
+			pv->Erase(i);
+
+	for(int i = 0; i < 1000000; i++)
+		if(pv->Read(i) != i && pv->Read(1) != 0)
+			cout << "mismatch: " << i << endl;
 
 	// Registry registry = RegistryFactory::New();
 
@@ -180,11 +177,11 @@ int main()
 	// auto it = query.Filter("position");
 
 	// auto it = registry->indexer->Fetch({"position"}, "(position)");
-	// it.Each([&](Entity e, Vec3 *pos) { 
-        
-    //     cout << e << endl;
-    //     pos->print();
-    //     });
+	// it.Each([&](Entity e, Vec3 *pos) {
+
+	//     cout << e << endl;
+	//     pos->print();
+	//     });
 
 	// auto it2 = query.Filter();
 

@@ -4,11 +4,12 @@
 
 #include "Engine.h"
 
-#include "Systems/SBackground.h"
 #include "Systems/SInput.h"
 #include "Systems/SMovement.h"
-#include "Systems/SPlayer.h"
+#include "Systems/SBackground.h"
 #include "Systems/SRendering.h"
+#include "Systems/SPlayer.h"
+#include "Systems/SEnemy.h"
 
 using namespace std;
 using namespace entidy;
@@ -22,6 +23,8 @@ int main()
 	engine->AddSystem(make_shared<SBackground>());
 	engine->AddSystem(make_shared<SRendering>());
 	engine->AddSystem(make_shared<SPlayer>());
+	engine->AddSystem(make_shared<SEnemy>());
+    
 	engine->Run();
 	return 0;
 }

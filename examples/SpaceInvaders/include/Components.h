@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <vector>
 
 namespace entidy::spaceinvaders
 {
@@ -60,6 +61,32 @@ enum BoundaryAction
     BOUNCE,
     WARP,
     DISAPPEAR
+};
+
+struct Sprite
+{
+    public:
+    struct Frame
+    {
+        struct Color
+        {
+            short R;
+            short G;
+            short B;
+        };
+
+        string glyphs;
+        Color bgcolor;
+        Color fgcolor;
+    };
+
+    vector<Frame> frames;
+
+    uint8_t cols;
+    uint8_t rows;
+    
+    float speed;
+    float frame;
 };
 
 } // namespace entidy::spaceinvaders

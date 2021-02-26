@@ -11,10 +11,11 @@ using namespace entidy;
 class SRendering : public System
 {
 protected:
-    void RenderPlayer(Engine engine);
+    void RenderSprites(Engine engine);
 	void RenderInvalidSize(Engine engine);
 	void RenderBackground(Engine engine);
-    void RenderProjectiles(Engine engine);
+	void RenderExplosions(Engine engine);
+    void ClearBorder(Engine engine);
     
 	double Distance(const Vec2f& p1, const Vec2f& p2);
 

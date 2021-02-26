@@ -14,23 +14,31 @@ void SRendering::Update(Engine engine)
 	}
 
 	RenderBackground(engine);
+	RenderExplosions(engine);
 
-    RenderProjectiles(engine);
+	RenderSprites(engine);
+	ClearBorder(engine);
+}
 
-    RenderPlayer(engine);
+double SRendering::Distance(const Vec2f& p1, const Vec2f& p2)
+{
+	return sqrt((p1.x - p2.x) * (p1.x - p2.x) + 3 * (p1.y - p2.y) * (p1.y - p2.y));
+}
 
+void SRendering::ClearBorder(Engine engine)
+{
 	ushort offset_x = (engine->Renderer()->Cols() - VIEWPORT_W) / 2;
 	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
 	for(ushort x = 0; x < engine->Renderer()->Cols(); x++)
 	{
 		for(ushort y = 0; y < engine->Renderer()->Rows(); y++)
 		{
-            bool inboundsx = (x >= offset_x && x < offset_x + VIEWPORT_W);
-            bool inboundsy = (y >= offset_y && y < offset_y + VIEWPORT_H);
-            
-            if(inboundsx && inboundsy)
-                continue;
-            
+			bool inboundsx = (x >= offset_x && x < offset_x + VIEWPORT_W);
+			bool inboundsy = (y >= offset_y && y < offset_y + VIEWPORT_H);
+
+			if(inboundsx && inboundsy)
+				continue;
+
 			Pixel* p = engine->Renderer()->At(x, y);
 			p->Foreground.R = 0;
 			p->Foreground.G = 0;
@@ -41,52 +49,52 @@ void SRendering::Update(Engine engine)
 			p->Glyph = ' ';
 		}
 	}
-
 }
 
-double SRendering::Distance(const Vec2f& p1, const Vec2f& p2)
-{
-	return sqrt( (p1.x - p2.x) * (p1.x - p2.x) + 3 * (p1.y - p2.y) * (p1.y - p2.y));
-}
-
-void SRendering::RenderProjectiles(Engine engine)
+void SRendering::RenderSprites(Engine engine)
 {
 	ushort offset_x = (engine->Renderer()->Cols() - VIEWPORT_W) / 2;
 	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
 
-	auto projectile_view = engine->Entidy()->Select({"Position"}).Having("Position & Projectile");
-	projectile_view.Each([&](Entity e, Vec2f* position)
-    {
-		    Pixel* p = engine->Renderer()->At(position->x + offset_x, position->y + offset_y);
+	auto sprite_view = engine->Entidy()->Select({"Sprite", "Position"}).Having("Sprite & Position");
+	sprite_view.Each([&](Entity e, Sprite* sprite, Vec2f* position) {
+		ushort start_x = offset_x + position->x - floor(float(sprite->cols) / 2.0);
+		ushort start_y = offset_y + position->y - floor(float(sprite->rows) / 2.0);
+		for(ushort x = 0; x < sprite->cols; x++)
+		{
+			for(ushort y = 0; y < sprite->rows; y++)
+			{
+                // if(start_x + x >= VIEWPORT_W || start_x + x < 0)
+                //     continue;
+                
+                // if(start_y + y >= VIEWPORT_H || start_y + y < 0)
+                //     continue;
+                
+				Pixel* p = engine->Renderer()->At(start_x + x, start_y + y);
+				size_t frame_id = size_t(round(sprite->frame)) % sprite->frames.size();
+				size_t glyph_id = y * sprite->cols + x;
+				if(glyph_id > sprite->frames[frame_id].glyphs.size())
+					continue;
 
-			p->Foreground.R = Helper::RandInt(0, 255);
-			p->Foreground.G = Helper::RandInt(0, 255);
-			p->Foreground.B = Helper::RandInt(0, 255);
+				if(sprite->frames[frame_id].bgcolor.R >= 0)
+					p->Background.R = sprite->frames[frame_id].bgcolor.R;
+				if(sprite->frames[frame_id].bgcolor.G >= 0)
+					p->Background.G = sprite->frames[frame_id].bgcolor.G;
+				if(sprite->frames[frame_id].bgcolor.B >= 0)
+					p->Background.B = sprite->frames[frame_id].bgcolor.B;
 
-            p->Glyph = '^';
-    });
+				if(sprite->frames[frame_id].fgcolor.R >= 0)
+					p->Foreground.R = sprite->frames[frame_id].fgcolor.R;
+				if(sprite->frames[frame_id].fgcolor.G >= 0)
+					p->Foreground.G = sprite->frames[frame_id].fgcolor.G;
+				if(sprite->frames[frame_id].fgcolor.B >= 0)
+					p->Foreground.B = sprite->frames[frame_id].fgcolor.B;
 
-}
-
-void SRendering::RenderPlayer(Engine engine)
-{
-	ushort offset_x = (engine->Renderer()->Cols() - VIEWPORT_W) / 2;
-	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
-
-	auto player_view = engine->Entidy()->Select({"Position"}).Having("Position & Player");
-	player_view.Each([&](Entity e, Vec2s* position)
-    {
-        ushort start_pos = offset_x + position->x;
-        for(ushort x = 0; x < 5; x++)
-        {
-		    Pixel* p = engine->Renderer()->At(start_pos + x, offset_y + VIEWPORT_H-1);
-
-			p->Background.R = 255;
-			p->Background.G = 255;
-			p->Background.B = 255;
-        }
-    });
-
+				p->Glyph = sprite->frames[frame_id].glyphs[glyph_id];
+			}
+		}
+		sprite->frame += sprite->speed;
+	});
 }
 
 void SRendering::RenderInvalidSize(Engine engine)
@@ -128,24 +136,10 @@ void SRendering::RenderBackground(Engine engine)
 			double diag = sqrt((VIEWPORT_W * VIEWPORT_W) + (VIEWPORT_H * VIEWPORT_H));
 			double sat_fog = (dist_fog / diag);
 
-			double sat_ripple = 0;
-			for(BGFXRipple* p : fx_ripples)
-			{
-				double dist_ripple = Distance(p->center, Vec2f((double)x, (double)y));
-				bool ripple_selected = dist_ripple < (p->radius);
-				sat_ripple += ripple_selected ? p->intensity : 0;
-			}
-
-			dist_fog = dist_fog / (double)fx_fog_positions.size();
-
 			Pixel* p = engine->Renderer()->At(x, y);
 			p->Background.R = 0;
 			p->Background.G = 0;
 			p->Background.B = (uint8_t)(sat_fog * 100.0);
-			p->Foreground.R = (uint8_t)(sat_ripple * 75.0);
-			p->Foreground.G = (uint8_t)(sat_ripple * 25.0);
-			p->Foreground.B = (uint8_t)max((sat_fog * 100.0), 0.0);
-			p->Glyph = sat_ripple > 0 ? (Helper::RandBool(0.5) ? '{' : '}') : ' ';
 		}
 	}
 
@@ -161,4 +155,34 @@ void SRendering::RenderBackground(Engine engine)
 	// 		p->Foreground.B = 0;
 	// 		p->Glyph = 'X';
 	//          });
+}
+
+void SRendering::RenderExplosions(Engine engine)
+{
+	ushort offset_x = (engine->Renderer()->Cols() - VIEWPORT_W) / 2;
+	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
+
+	vector<BGFXRipple*> fx_ripples;
+	View view_ripple = engine->Entidy()->Select({"BGFXRipple"}).Having("BGFXRipple");
+	view_ripple.Each([&](Entity e, BGFXRipple* ripple) { fx_ripples.push_back(ripple); });
+
+	for(ushort x = 0; x < engine->Renderer()->Cols(); x++)
+	{
+		for(ushort y = 0; y < engine->Renderer()->Rows(); y++)
+		{
+			double sat_ripple = 0;
+			for(BGFXRipple* p : fx_ripples)
+			{
+				double dist_ripple = Distance(p->center, Vec2f((double)x, (double)y));
+				bool ripple_selected = dist_ripple < (p->radius);
+				sat_ripple += ripple_selected ? p->intensity : 0;
+			}
+
+			Pixel* p = engine->Renderer()->At(offset_x + x, offset_y + y);
+			p->Foreground.R = (uint8_t)(sat_ripple * 75.0);
+			p->Foreground.G = (uint8_t)(sat_ripple * 25.0);
+			p->Foreground.B = (uint8_t)(max(p->Background.B, (uint8_t)(sat_ripple * 25.0)));
+			p->Glyph = sat_ripple > 0 ? (Helper::RandBool(0.5) ? '{' : '}') : ' ';
+		}
+	}
 }

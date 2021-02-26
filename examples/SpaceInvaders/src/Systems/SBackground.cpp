@@ -25,15 +25,4 @@ void SBackground::Update(Engine engine)
             engine->Entidy()->Erase(e);
 	});
 
-	if(Helper::RandBool(0.99))
-        return;
-    
-	Entity e = engine->Entidy()->Create();
-
-    BGFXRipple ripple;
-    ripple.center = Vec2f ( Helper::RandInt(0, VIEWPORT_W), Helper::RandInt(0, VIEWPORT_H));
-    ripple.radius = 0;
-    ripple.intensity = Helper::RandDouble(0.5, 1);
-    engine->Entidy()->Emplace(e, "BGFXRipple", ripple);
-
 }

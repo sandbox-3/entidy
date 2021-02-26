@@ -82,7 +82,7 @@ public:
 	template <typename Type>
     Type* At(size_t row, size_t col)
     {
-        return static_cast<Type*>(data[col+1]->Read(row));
+        return reinterpret_cast<Type*>(data[col+1]->Read(row));
     }
 
     Entity At(size_t row)

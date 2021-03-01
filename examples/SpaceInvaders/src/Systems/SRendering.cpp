@@ -56,7 +56,7 @@ void SRendering::RenderSprites(Engine engine)
 	ushort offset_x = (engine->Renderer()->Cols() - VIEWPORT_W) / 2;
 	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
 
-	auto sprite_view = engine->Entidy()->Select({"Sprite", "Position"}).Having("Sprite & Position");
+	auto sprite_view = engine->Registry()->Select({"Sprite", "Position"}).Having("Sprite & Position");
 	sprite_view.Each([&](Entity e, Sprite* sprite, Vec2f* position) {
 		ushort start_x = offset_x + position->x - floor(float(sprite->cols) / 2.0);
 		ushort start_y = offset_y + position->y - floor(float(sprite->rows) / 2.0);
@@ -117,11 +117,11 @@ void SRendering::RenderInvalidSize(Engine engine)
 void SRendering::RenderBackground(Engine engine)
 {
 	vector<Vec2f*> fx_fog_positions;
-	View view_fog = engine->Entidy()->Select({"Position"}).Having("Position & BGFXFog");
+	View view_fog = engine->Registry()->Select({"Position"}).Having("Position & BGFXFog");
 	view_fog.Each([&](Entity e, Vec2f* position) { fx_fog_positions.push_back(position); });
 
 	vector<BGFXRipple*> fx_ripples;
-	View view_ripple = engine->Entidy()->Select({"BGFXRipple"}).Having("BGFXRipple");
+	View view_ripple = engine->Registry()->Select({"BGFXRipple"}).Having("BGFXRipple");
 	view_ripple.Each([&](Entity e, BGFXRipple* ripple) { fx_ripples.push_back(ripple); });
 
 	for(ushort x = 0; x < engine->Renderer()->Cols(); x++)
@@ -163,7 +163,7 @@ void SRendering::RenderExplosions(Engine engine)
 	ushort offset_y = (engine->Renderer()->Rows() - VIEWPORT_H) / 2;
 
 	vector<BGFXRipple*> fx_ripples;
-	View view_ripple = engine->Entidy()->Select({"BGFXRipple"}).Having("BGFXRipple");
+	View view_ripple = engine->Registry()->Select({"BGFXRipple"}).Having("BGFXRipple");
 	view_ripple.Each([&](Entity e, BGFXRipple* ripple) { fx_ripples.push_back(ripple); });
 
 	for(ushort x = 0; x < engine->Renderer()->Cols(); x++)

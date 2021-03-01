@@ -9,14 +9,14 @@
 #include <entidy/QueryParser.h>
 #include <entidy/Indexer.h>
 #include <entidy/View.h>
-#include <entidy/Registry.h>
+#include <entidy/Entidy.h>
 
 namespace entidy
 {
 using namespace std;
 
-class RegistryImpl;
-using Registry = shared_ptr<RegistryImpl>;
+class EntidyImpl;
+using Entidy = shared_ptr<EntidyImpl>;
 
 class Query
 {
@@ -36,7 +36,7 @@ public:
 		return indexer->Fetch(select, filter);
 	}
 
-	friend RegistryImpl;
+	friend EntidyImpl;
 };
 
 } // namespace entidy

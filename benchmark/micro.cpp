@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "catch2/catch.hpp"
-#include "entidy/Registry.h"
+#include "entidy/Entidy.h"
 #include "entt.hpp"
 
 template <size_t Size>
@@ -46,7 +46,7 @@ TEST_CASE("Creating 100000 entities")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::RegistryFactory::New();
+		auto registry = entidy::EntidyFactory::New();
 
 		meter.measure([&]() {
 			for(auto i = 0; i < 1000000L; i++)
@@ -69,7 +69,7 @@ TEST_CASE("Creating 100000 entities Bulk")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::RegistryFactory::New();
+		auto registry = entidy::EntidyFactory::New();
 
 		auto entities = entidy_vector_of_n_entities(100000);
 
@@ -103,7 +103,7 @@ TEST_CASE("Creating 100000 entities + Emplace Components")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::RegistryFactory::New();
+		auto registry = entidy::EntidyFactory::New();
 
 		auto entities = entidy_vector_of_n_entities(100000);
 
@@ -140,7 +140,7 @@ TEST_CASE("Creating 100000 entities + Emplace Bulk Components")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::RegistryFactory::New();
+		auto registry = entidy::EntidyFactory::New();
 
 		auto entities = entidy_vector_of_n_entities(100000);
 
@@ -182,7 +182,7 @@ TEST_CASE("Removing 100000 components from their entities")
 	{
 
 		meter.measure([]() {
-			auto registry = entidy::RegistryFactory::New();
+			auto registry = entidy::EntidyFactory::New();
 			auto entities = entidy_vector_of_n_entities(100000);
 
 			for(auto i = 0; i < entities.size(); i++)
@@ -238,7 +238,7 @@ TEST_CASE("Removing 100000 components from their entities at once")
 	BENCHMARK_ADVANCED("entidy")
 	(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::RegistryFactory::New();
+		auto registry = entidy::EntidyFactory::New();
 		auto entities = entidy_vector_of_n_entities(100000);
 
 		for(auto i = 0; i < entities.size(); i++)

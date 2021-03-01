@@ -7,7 +7,7 @@ void SMovement::Init(Engine engine) { }
 
 void SMovement::Update(Engine engine)
 {
-	View view_bounce = engine->Entidy()->Select({"Position", "Velocity", "BoundaryAction"}).Having("Position & Velocity & BoundaryAction");
+	View view_bounce = engine->Registry()->Select({"Position", "Velocity", "BoundaryAction"}).Having("Position & Velocity & BoundaryAction");
 	view_bounce.Each([&](Entity e, Vec2f* position, Vec2f* velocity, BoundaryAction* boundary_action) {
 		position->x += velocity->x;
 		position->y += velocity->y;
@@ -42,7 +42,7 @@ void SMovement::Update(Engine engine)
             inbounds &= (position->y < VIEWPORT_H && position->y > 0);
 
             if(!inbounds)
-                engine->Entidy()->Erase(e);
+                engine->Registry()->Erase(e);
         }
 	});
 }

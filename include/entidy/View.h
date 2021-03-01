@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <vector>
 
-#include <entidy/Registry.h>
+#include <entidy/Entidy.h>
 #include <entidy/SparseVector.h>
 #include <entidy/Indexer.h>
 

@@ -39,8 +39,8 @@ void SInput::Update(Engine engine)
 		default:
 			continue;
 		};
-		Entity e = engine->Entidy()->Create();
-        engine->Entidy()->Emplace(e, "InputCommand", cmd);
+		Entity e = engine->Registry()->Create();
+        engine->Registry()->Emplace(e, "InputCommand", cmd);
 	}
 	// View view_bounce = engine->Entidy()->Select({"Position", "Velocity"}).Filter("Bounce");
 	// view_bounce.Each([&](Entity e, Vec2f* position, Vec2f* velocity) {

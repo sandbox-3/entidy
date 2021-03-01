@@ -5,19 +5,19 @@ using namespace entidy::spaceinvaders;
 
 void SPlayer::Init(Engine engine)
 {
-	Entity e = engine->Entidy()->Create();
-	engine->Entidy()->Emplace<Vec2f>(e, "Position", VIEWPORT_W / 2, VIEWPORT_H - 1);
-	engine->Entidy()->Emplace<Sprite>(e, "Sprite", SpriteFactory::Player());
-	engine->Entidy()->Emplace<u_int8_t>(e, "Player");
+	Entity e = engine->Registry()->Create();
+	engine->Registry()->Emplace<Vec2f>(e, "Position", VIEWPORT_W / 2, VIEWPORT_H - 1);
+	engine->Registry()->Emplace<Sprite>(e, "Sprite", SpriteFactory::Player());
+	engine->Registry()->Emplace<u_int8_t>(e, "Player");
 }
 
 void SPlayer::Update(Engine engine)
 {
 
-	auto input_cmd_view = engine->Entidy()->Select({"InputCommand"}).Having("InputCommand");
+	auto input_cmd_view = engine->Registry()->Select({"InputCommand"}).Having("InputCommand");
 	input_cmd_view.Each([&](Entity cmd_e, InputCommand* cmd) {
 
-		auto player_view = engine->Entidy()->Select({"Position", "Sprite"}).Having("Player & Position & Sprite");
+		auto player_view = engine->Registry()->Select({"Position", "Sprite"}).Having("Player & Position & Sprite");
 		player_view.Each([&](Entity player_e, Vec2f* position, Sprite * sprite) {
             
 			if(*cmd == InputCommand::A)
@@ -32,19 +32,19 @@ void SPlayer::Update(Engine engine)
 			}
 			else if(*cmd == InputCommand::SPACE)
 			{
-	            Entity bullet = engine->Entidy()->Create();
-	            engine->Entidy()->Emplace<Vec2f>(bullet, "Position", position->x, position->y);
-	            engine->Entidy()->Emplace<Vec2f>(bullet, "Velocity", 0, -1);
-	            engine->Entidy()->Emplace<BoundaryAction>(bullet, "BoundaryAction", BoundaryAction::DISAPPEAR);
-	            engine->Entidy()->Emplace<Sprite>(bullet, "Sprite", SpriteFactory::Bullet());
-	            engine->Entidy()->Emplace<int8_t>(bullet, "Bullet");
+	            Entity bullet = engine->Registry()->Create();
+	            engine->Registry()->Emplace<Vec2f>(bullet, "Position", position->x, position->y);
+	            engine->Registry()->Emplace<Vec2f>(bullet, "Velocity", 0, -1);
+	            engine->Registry()->Emplace<BoundaryAction>(bullet, "BoundaryAction", BoundaryAction::DISAPPEAR);
+	            engine->Registry()->Emplace<Sprite>(bullet, "Sprite", SpriteFactory::Bullet());
+	            engine->Registry()->Emplace<int8_t>(bullet, "Bullet");
 			}
 			else
 			{
 				return;
 			}
 
-			engine->Entidy()->Erase(cmd_e);
+			engine->Registry()->Erase(cmd_e);
 		});
 	});
 }

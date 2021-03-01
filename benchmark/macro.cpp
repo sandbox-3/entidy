@@ -69,12 +69,12 @@ namespace entidy_benchmark
 using namespace entidy;
 using namespace entt;
 
-class Entidy : public BenchmarkTarget
+class EntidyBenchmark : public BenchmarkTarget
 {
 	size_t count;
 
 public:
-	Entidy(size_t count)
+	EntidyBenchmark(size_t count)
 	{
 		this->count = count;
 	}
@@ -82,7 +82,7 @@ public:
 	virtual void Scenario1(unsigned int seed) override
 	{
 		auto proba = UniformRandom<float>{seed};
-		auto registry = RegistryFactory::New();
+		auto registry = EntidyFactory::New();
 		auto t0 = timer{};
 
 		for(size_t i = 0; i < count; i++)
@@ -150,7 +150,7 @@ public:
 	virtual void Scenario2(unsigned int seed) override
 	{
 		auto proba = UniformRandom<float>{seed};
-		auto registry = RegistryFactory::New();
+		auto registry = EntidyFactory::New();
 
 		for(size_t i = 0; i < count; i++)
 		{
@@ -183,12 +183,12 @@ public:
 	}
 };
 
-class EnTT : public BenchmarkTarget
+class EnTTBenchmark : public BenchmarkTarget
 {
 	size_t count;
 
 public:
-	EnTT(size_t count)
+	EnTTBenchmark(size_t count)
 	{
 		this->count = count;
 	}
@@ -302,13 +302,13 @@ int main(int argc, char** argv)
 	cout << "Scenario 1" << endl;
 	cout << "OURS" << endl;
 	{
-		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
+		shared_ptr<BenchmarkTarget> ours = make_shared<EntidyBenchmark>(count);
 		ours->Scenario1(1);
 	}
 	std::this_thread::sleep_for(1s);
 	cout << "ENTT" << endl;
 	{
-		shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);
+		shared_ptr<BenchmarkTarget> entt = make_shared<EnTTBenchmark>(count);
 		entt->Scenario1(1);
 	}
 
@@ -317,13 +317,13 @@ int main(int argc, char** argv)
 	cout << "Scenario 2" << endl;
 	cout << "OURS" << endl;
 	{
-		shared_ptr<BenchmarkTarget> ours = make_shared<Entidy>(count);
+		shared_ptr<BenchmarkTarget> ours = make_shared<EntidyBenchmark>(count);
 		ours->Scenario2(1);
 	}
 	std::this_thread::sleep_for(1s);
 	cout << "ENTT" << endl;
 	{
-		shared_ptr<BenchmarkTarget> entt = make_shared<EnTT>(count);
+		shared_ptr<BenchmarkTarget> entt = make_shared<EnTTBenchmark>(count);
 		entt->Scenario2(1);
 	}
 

@@ -17,7 +17,7 @@ using namespace entidy::spaceinvaders;
 
 int main()
 {
-	Engine engine = make_shared<EngineImpl>(30);
+	Engine engine = make_shared<EngineImpl>();
 	engine->AddSystem(make_shared<SInput>());
 	engine->AddSystem(make_shared<SMovement>());
 	engine->AddSystem(make_shared<SBackground>());

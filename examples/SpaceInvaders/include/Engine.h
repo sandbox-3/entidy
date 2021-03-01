@@ -51,18 +51,16 @@ protected:
 	Console console;
 
 	vector<shared_ptr<System>> systems;
-	double fps;
 
 	deque<char> input_buffer;
 
 	bool running = true;
 
 public:
-	EngineImpl(double fps)
+	EngineImpl()
 	{
 		this->registry = RegistryFactory::New();
 		this->console = make_shared<ConsoleImpl>();
-		this->fps = fps;
 	}
 
 	void AddSystem(shared_ptr<System> system)
@@ -90,19 +88,19 @@ public:
 		char buf = 0;
 		struct termios old = {0};
 		if(tcgetattr(0, &old) < 0)
-			perror("tcsetattr()");
+			return 0;
 		old.c_lflag &= ~ICANON;
 		old.c_lflag &= ~ECHO;
 		old.c_cc[VMIN] = 1;
 		old.c_cc[VTIME] = 0;
 		if(tcsetattr(0, TCSANOW, &old) < 0)
-			perror("tcsetattr ICANON");
+			return 0;
 		if(read(0, &buf, 1) < 0)
-			perror("read()");
+			return 0;
 		old.c_lflag |= ICANON;
 		old.c_lflag |= ECHO;
 		if(tcsetattr(0, TCSADRAIN, &old) < 0)
-			perror("tcsetattr ~ICANON");
+			return 0;
 		return (buf);
 	}
 
@@ -128,7 +126,6 @@ public:
 				future = std::async(std::launch::async, &EngineImpl::GetChar, this);
 			}
 
-			timer t;
 			for(auto& it : systems)
 			{
 				it->Update(shared_from_this());
@@ -136,11 +133,7 @@ public:
 
 			console->Render();
 
-			double elapsed = t.elapsed();
-			double target = 1.0 / fps;
-			double tusleep = (target - elapsed) * 1000 * 1000;
-			if(tusleep > 0)
-				usleep(tusleep);
+			usleep(1000);
 		}
 	}
 };

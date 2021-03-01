@@ -47,7 +47,7 @@ private:
 class EngineImpl : public enable_shared_from_this<EngineImpl>
 {
 protected:
-	Entidy registry;
+	shared_ptr<Entidy> registry;
 	Console console;
 
 	vector<shared_ptr<System>> systems;
@@ -59,7 +59,7 @@ protected:
 public:
 	EngineImpl()
 	{
-		this->registry = EntidyFactory::New();
+		this->registry = make_shared<Entidy>();
 		this->console = make_shared<ConsoleImpl>();
 	}
 
@@ -68,7 +68,7 @@ public:
 		this->systems.push_back(system);
 	}
 
-	Entidy Registry()
+	shared_ptr<Entidy> Registry()
 	{
 		return registry;
 	}

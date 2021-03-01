@@ -82,7 +82,7 @@ public:
 	virtual void Scenario1(unsigned int seed) override
 	{
 		auto proba = UniformRandom<float>{seed};
-		auto registry = EntidyFactory::New();
+		auto registry = make_shared<entidy::Entidy>();
 		auto t0 = timer{};
 
 		for(size_t i = 0; i < count; i++)
@@ -150,7 +150,7 @@ public:
 	virtual void Scenario2(unsigned int seed) override
 	{
 		auto proba = UniformRandom<float>{seed};
-		auto registry = EntidyFactory::New();
+		auto registry = make_shared<entidy::Entidy>();
 
 		for(size_t i = 0; i < count; i++)
 		{

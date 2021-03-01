@@ -15,8 +15,7 @@ namespace entidy
 {
 using namespace std;
 
-class EntidyImpl;
-using Entidy = shared_ptr<EntidyImpl>;
+class Entidy;
 
 class Query
 {
@@ -36,7 +35,7 @@ public:
 		return indexer->Fetch(select, filter);
 	}
 
-	friend EntidyImpl;
+	friend Entidy;
 };
 
 } // namespace entidy

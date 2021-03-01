@@ -25,9 +25,6 @@ struct ComponentMap
 	MemoryManager mem_pool;
 };
 
-class EntidyImpl;
-using Entidy = shared_ptr<EntidyImpl>;
-
 class IndexerImpl;
 using Indexer = shared_ptr<IndexerImpl>;
 

@@ -17,23 +17,19 @@ using namespace std;
 
 using Entity = uint32_t;
 
-class EntidyFactory;
-
-class EntidyImpl;
-using Entidy = shared_ptr<EntidyImpl>;
-
-class EntidyImpl : public enable_shared_from_this<EntidyImpl>
+class Entidy
 {
 protected:
 	Indexer indexer;
 
-	EntidyImpl()
+
+public:
+	Entidy()
 	{
 		indexer = make_shared<IndexerImpl>();
 	}
 
-public:
-	~EntidyImpl()
+	~Entidy()
 	{
 	}
 
@@ -96,18 +92,5 @@ public:
 	{
 		indexer->CleanUp();
 	}
-
-	friend EntidyFactory;
 };
-
-class EntidyFactory
-{
-public:
-	static Entidy New()
-	{
-		Entidy registry(new EntidyImpl());
-		return registry;
-	}
-};
-
 } // namespace entidy

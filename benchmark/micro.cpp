@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <memory>
 
 #include "catch2/catch.hpp"
 #include "entidy/Entidy.h"
@@ -46,7 +47,7 @@ TEST_CASE("Creating 100000 entities")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::EntidyFactory::New();
+		auto registry = std::make_shared<entidy::Entidy>();
 
 		meter.measure([&]() {
 			for(auto i = 0; i < 1000000L; i++)
@@ -69,7 +70,7 @@ TEST_CASE("Creating 100000 entities Bulk")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::EntidyFactory::New();
+		auto registry = std::make_shared<entidy::Entidy>();
 
 		auto entities = entidy_vector_of_n_entities(100000);
 
@@ -103,7 +104,7 @@ TEST_CASE("Creating 100000 entities + Emplace Components")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::EntidyFactory::New();
+		auto registry = std::make_shared<entidy::Entidy>();
 
 		auto entities = entidy_vector_of_n_entities(100000);
 
@@ -140,7 +141,7 @@ TEST_CASE("Creating 100000 entities + Emplace Bulk Components")
 
 	BENCHMARK_ADVANCED("entidy")(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::EntidyFactory::New();
+		auto registry = std::make_shared<entidy::Entidy>();
 
 		auto entities = entidy_vector_of_n_entities(100000);
 
@@ -182,7 +183,7 @@ TEST_CASE("Removing 100000 components from their entities")
 	{
 
 		meter.measure([]() {
-			auto registry = entidy::EntidyFactory::New();
+		auto registry = std::make_shared<entidy::Entidy>();
 			auto entities = entidy_vector_of_n_entities(100000);
 
 			for(auto i = 0; i < entities.size(); i++)
@@ -238,7 +239,7 @@ TEST_CASE("Removing 100000 components from their entities at once")
 	BENCHMARK_ADVANCED("entidy")
 	(Catch::Benchmark::Chronometer meter)
 	{
-		auto registry = entidy::EntidyFactory::New();
+		auto registry = std::make_shared<entidy::Entidy>();
 		auto entities = entidy_vector_of_n_entities(100000);
 
 		for(auto i = 0; i < entities.size(); i++)

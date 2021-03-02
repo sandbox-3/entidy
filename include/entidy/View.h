@@ -71,12 +71,12 @@ public:
 		{
 			if constexpr(N == 1)
             {
-                if(typeid(Head).hash_code() != types[types.size() - N])
+                if(types[types.size() - N] != 0 && typeid(Head).hash_code() != types[types.size() - N])
                     throw(EntidyException("Type mismatch for class " + string(typeid(Head).name())));
             }
 			else
             {
-                if(typeid(Head).hash_code() != types[types.size() - N])
+                if(types[types.size() - N] != 0 && typeid(Head).hash_code() != types[types.size() - N])
                     throw(EntidyException("Type mismatch for class " + string(typeid(Head).name())));
 				TypeCheckGenerator<N - 1, Rest...>();
             }

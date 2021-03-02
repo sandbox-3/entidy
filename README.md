@@ -1,5 +1,7 @@
 # Entidy
 
+[![CMake](https://github.com/sandbox-3/entidy/actions/workflows/cmake.yml/badge.svg)](https://github.com/sandbox-3/entidy/actions/workflows/cmake.yml)
+
 `Entidy` is an [Entity-Component-System](https://en.wikipedia.org/wiki/Entity_component_system)
 written in C++17.
 

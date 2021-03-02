@@ -7,7 +7,7 @@ Features:
 
 1. Separation between C++ types (`struct` or `class`) from `Components`
 2. A querying language
-3. Autmatic memory management
+3. Automatic memory management
 4. Static or Dynamic build.
 
 

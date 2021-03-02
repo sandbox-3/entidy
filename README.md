@@ -141,20 +141,20 @@ int main()
   Entidy registry;
 
   auto city_1    = registry.Create();
-  auto peasent_1 = registry.Create();
-  auto peasent_2 = registry.Create();
+  auto peasant_1 = registry.Create();
+  auto peasant_2 = registry.Create();
 
   registry.Emplace<City>(city_1, "city");
-  registry.Emplace<Peasent>(peasent_1, "peasent");
-  registry.Emplace<Peasent>(peasent_2, "peasent");
+  registry.Emplace<Peasant>(peasant_1, "peasant");
+  registry.Emplace<Peasant>(peasant_2, "peasant");
 
   auto lives_in_city_1 = "lives_in_" + std::to_string(city_1);
 
-  registry.Emplace<Peasent>(peasent_1, lives_in_city_1);
-  registry.Emplace<Peasent>(peasent_2, lives_in_city_1);
+  registry.Emplace<Peasant>(peasant_1, lives_in_city_1);
+  registry.Emplace<Peasant>(peasant_2, lives_in_city_1);
 
-  auto view = registry.Select({"peasent"})
-                      .Having("peasent & " + lives_in_city_1);
+  auto view = registry.Select({"peasant"})
+                      .Having("peasant & " + lives_in_city_1);
 
   ...
 
@@ -179,7 +179,7 @@ Additional constaints can be added as such:
 
 ```c++
 auto view = registry.Select({"position", "velocity"})
-                    .Having("position & velocity & (!peasent || city)");
+                    .Having("position & velocity & (!peasant | city)");
 ```
 
 ### Optional Selection
@@ -211,13 +211,13 @@ The query language used in `Having` has the following operators:
 | Operator | Meaning | Example                |
 | -------- | ------- | ---------------------- |
 | `&`      | AND     | `position & velocity`  |
-| `\|`     | OR      | `position | velocity`  |
+| `\|`     | OR      | `position \| velocity`  |
 | `!`      | NOT     | `position & !velocity` |
 
 Expressions can be nested using parenthesis as such:
 
 ```
-position & velocity & !(city | peasent)
+position & velocity & !(city | peasant)
 ```
 
 ### Accessing Views without Lambdas

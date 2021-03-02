@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include <typeinfo>
 
 #include <entidy/CRoaring/roaring.hh>
 #include <entidy/Exception.h>
@@ -23,6 +24,7 @@ struct ComponentMap
 	BitMap entities;
 	SparseVector<DEFAULT_SV_SIZE> components;
 	MemoryManager mem_pool;
+    size_t type;
 };
 
 class IndexerImpl;
@@ -131,6 +133,12 @@ public:
         if(!maps[c].mem_pool)
             maps[c].mem_pool = MemoryManagerImpl::Create<Type>();
         
+        if(maps[c].type == 0)
+            maps[c].type = typeid(Type*).hash_code();
+        
+        if(maps[c].type != typeid(Type*).hash_code())
+            throw(EntidyException("Component Type mismatch for key " + key));
+
 		intptr_t prev = maps[c].components->Read(entity);
 		if(prev != 0)
 			maps[c].mem_pool->Push(prev);
@@ -151,10 +159,13 @@ public:
 		return prev;
 	}
 
-	intptr_t GetComponent(Entity entity, const string& key)
+	template <typename Type>
+	Type* GetComponent(Entity entity, const string& key)
 	{
 		size_t c = ComponentIndex(key);
-		return maps[c].components->Read(entity);
+        if(maps[c].type != typeid(Type*).hash_code())
+            throw(EntidyException("Component Type mismatch for key " + key));
+		return (Type*)maps[c].components->Read(entity);
 	}
 
 	void CleanUp()
@@ -201,20 +212,27 @@ public:
 			++it;
 		}
 
+        vector<size_t> types(keys.size()+1);
+        types[0] = typeid(Entity).hash_code();
 		for(size_t k = 0; k < keys.size(); k++)
 		{
 			i = 0;
+			size_t c = ComponentIndex(keys[k]);
+
+            SparseVector<DEFAULT_SV_SIZE> sv = maps[c].components;
+            types[k + 1] = maps[c].type;
+
 			it = query.begin();
+
 			while(it != query.end())
 			{
-				size_t c = ComponentIndex(keys[k]);
-				results[k + 1]->Write(i, maps[c].components->Read(*it));
+				results[k + 1]->Write(i, sv->Read(*it));
 				++i;
 				++it;
 			}
 		}
 
-		return View(results);
+		return View(results, types);
 	}
 
 	// Query Parser Adapter Functions

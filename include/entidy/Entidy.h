@@ -80,7 +80,7 @@ public:
 	template <typename Type>
 	Type* Component(Entity entity, const string& key)
 	{
-		return (Type*)indexer->GetComponent(entity, key);
+		return indexer->GetComponent<Type>(entity, key);
 	}
 
 	void SizeHint(const string& key, size_t size_hint)

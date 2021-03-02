@@ -29,12 +29,12 @@ void SEnemy::Update(Engine engine)
             engine->Registry()->Emplace<Vec2f>(e, "Velocity", dir, 0.01);
             engine->Registry()->Emplace<BoundaryAction>(e, "BoundaryAction", BoundaryAction::WARP);
             engine->Registry()->Emplace<u_int8_t>(e, "Enemy");
-            engine->Registry()->Emplace<int>(e, "Health", (enemy_type + 1) * 20);
+            engine->Registry()->Emplace<u_int8_t>(e, "Health", (enemy_type + 1) * 20);
         }
     }
 
 	auto sprite_view = engine->Registry()->Select({"Sprite", "Position", "Health"}).Having("Sprite & Position & Health & Enemy");
-	sprite_view.Each([&](Entity enemy, Sprite* sprite, Vec2f* enemy_pos, uint8_t * health) {
+	sprite_view.Each([&](Entity enemy, Sprite* sprite, Vec2f* enemy_pos, u_int8_t * health) {
 		auto bullet_view = engine->Registry()->Select({"Position"}).Having("Bullet & Position");
 		bullet_view.Each([&](Entity bullet, Vec2f* bullet_pos) {
             

@@ -63,7 +63,7 @@ public:
 	}
 
 	/**
-     * @brief Returns value at selected index. If page does not exist, returns 0
+     * @brief Returns value at selected index. If page does not exist, returns 0.
      * @return Value at selected index or 0 if empty.
      */
 	intptr_t Read(size_t index) const
@@ -110,7 +110,7 @@ public:
 	}
 
 	/**
-     * @brief Sets value at index 'index' to 0.
+     * @brief Sets value at index 'index' to 0..
      * If page is empty after erasure, sends page back to memory pool for recycling.
      * @return Previous value at 'index'.
      */

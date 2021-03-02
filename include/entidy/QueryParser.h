@@ -44,6 +44,11 @@ public:
 		op = Parse(key);
 	}
 
+	/**
+     * @brief Translate a token string into its TokenType enum.
+     * Possible token types are the operations (and, or, not), block delimiters (parentheses) and NIL (error).
+     * @return enum TokenType.
+     */
 	TokenType Parse(const string& key)
 	{
 		this->key = key;
@@ -63,6 +68,11 @@ public:
 			return TokenType::Leaf;
 	}
 
+	/**
+     * @brief Internal function used for expression tree construction.
+     * A token is valid if it can be evaluated, i.e has 2 children if its AND and OR, 1 if NOT, etc..
+     * @return true if valid, false otherwise.
+     */
 	bool Valid()
 	{
 		switch(op)
@@ -85,6 +95,12 @@ public:
 		return false;
 	}
 
+	/**
+     * @brief Evaluates a branch in the tree and calls the appropriate evaluation functions on the adapter.
+     * @tparam Type of the evaluation objects (e.g Bitset or Bitmap objects).
+     * @param adapter A pointer to a QueryParserAdapter.
+     * @return The result of the evaluation.
+     */
 	template <typename Type>
 	Type Evaluate(QueryParserAdapter<Type>* adapter)
 	{
@@ -110,6 +126,11 @@ class QueryParser
 protected:
 	QueryParserAdapter<Type>* adapter;
 
+	/**
+     * @brief Splits a query string into invidual tokens.
+     * Separators are: empty space, &, |, !, ) and (
+     * @return deque of Tokens.
+     */
 	deque<Token> Tokenize(const string& query)
 	{
 		std::string const delims{" ()&|!"};
@@ -139,6 +160,10 @@ protected:
 		return tokens;
 	}
 
+	/**
+     * @brief Combines and removes block tokens ) or (.
+     * @return false if no block tokens were found, true otherwise.
+     */
 	bool ParseBlocks(deque<Token>& tokens)
 	{
 		if(tokens.size() < 3)
@@ -176,6 +201,10 @@ protected:
 		return false;
 	}
 
+	/**
+     * @brief Combines and removes Not tokens.
+     * @return false if no Not tokens were found, true otherwise.
+     */
 	bool ParseNot(deque<Token>& tokens)
 	{
 		auto it = tokens.begin();
@@ -196,6 +225,10 @@ protected:
 		return false;
 	}
 
+	/**
+     * @brief Combines and removes And and Or tokens.
+     * @return false if no And or Or tokens were found, true otherwise.
+     */
 	bool ParseAndOr(deque<Token>& tokens, bool op)
 	{
 		if(tokens.size() < 3)
@@ -225,6 +258,10 @@ protected:
 		return false;
 	}
 
+	/**
+     * @brief Builds the processing tree
+     * @return false if no blocks were found, true otherwise.
+     */
 	bool BuildTree(deque<Token>& tokens)
 	{
 		bool operate = false;
@@ -264,6 +301,12 @@ public:
 		this->adapter = adapter;
 	}
 
+	/**
+     * @brief Combines and removes Not tokens.
+     * @param query A query string.
+     * @return The result of executing the query.
+     * @throws EntidyException if the query syntax is wrong, or the evaluation of expressions failed.
+     */
 	Type Parse(const string& query)
 	{
 		auto tokens = Tokenize(query);

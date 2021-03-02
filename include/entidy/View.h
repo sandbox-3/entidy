@@ -120,8 +120,8 @@ public:
 	}
 
 	/**
-     * @brief Returns the number of entities in this view
-     * @return Number of entities in this view
+     * @brief Returns the number of entities in this view.
+     * @return Number of entities in this view.
      */
 	size_t Size() const
 	{

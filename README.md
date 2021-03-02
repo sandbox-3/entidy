@@ -211,7 +211,7 @@ The query language used in `Having` has the following operators:
 | Operator | Meaning | Example                |
 | -------- | ------- | ---------------------- |
 | `&`      | AND     | `position & velocity`  |
-| `|`      | OR      | `position | velocity`  |
+| `\|`     | OR      | `position | velocity`  |
 | `!`      | NOT     | `position & !velocity` |
 
 Expressions can be nested using parenthesis as such:

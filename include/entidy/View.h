@@ -118,12 +118,12 @@ public:
         return data[0]->Size();
     }
 
-	template <typename Type>
-    Type* At(size_t row, size_t col)
+	template <typename Type, size_t Col>
+    Type* At(size_t row)
     {
-        if(typeid(Type*).hash_code() != types[col+1])
+        if(typeid(Type*).hash_code() != types[Col+1])
             throw(EntidyException("Type mismatch for class " + string(typeid(Type).name())));
-        return reinterpret_cast<Type*>(data[col+1]->Read(row));
+        return reinterpret_cast<Type*>(data[Col+1]->Read(row));
     }
 
     Entity At(size_t row)

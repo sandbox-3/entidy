@@ -64,7 +64,7 @@ int main()
     entidy.Emplace<Velocity>(e, "test2");
 
     auto view = entidy.Select({"test1", "test2"}).Having("test1 & test2");
-    view.Each([&](Entity n, Position * pos, Position *vel)
+    view.Each([&](Entity n, Position * pos, Velocity *vel)
     {
         cout << n << endl;
     });

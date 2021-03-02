@@ -12,7 +12,7 @@ void SEnemy::Init(Engine engine)
 void SEnemy::Update(Engine engine)
 {
 	auto spawn_view = engine->Registry()->Select({"EnemySpawn"}).Having("EnemySpawn");
-    int *spawn = spawn_view.At<int>(0, 0);
+    int *spawn = spawn_view.At<int, 0>(0);
     if((*spawn)-- == 0)
     {
         *spawn = 512 + Helper::RandInt(0, 256);

@@ -24,6 +24,10 @@ protected:
 	intptr_t start;
 	intptr_t end;
 
+	/**
+     * @brief Creates a block and pre-allocates elements of given Type in cache-aligned and contiguous storage.
+     * @param item_capacity The number of items to be allocated in the block.
+     */
 	MemoryBlock(size_t item_capacity)
 	{
 		this->item_capacity = item_capacity;
@@ -41,27 +45,46 @@ protected:
 	}
 
 public:
+	/**
+     * @brief Deallocates all the data in the block.
+     */
 	~MemoryBlock()
 	{
 		delete []data;
 	}
 
+	/**
+     * @brief Returns the number of items that the block can hold.
+     * @return The block capacity.
+     */
 	size_t Capacity()
 	{
 		return item_capacity;
 	}
 
+	/**
+     * @brief Returns the number of items currently available in the block.
+     * @return The available count.
+     */
 	size_t Available()
 	{
 		return pool.size();
 	}
 
+	/**
+     * @brief Pushes an item to the back of the block.
+     * @param ptr A pointer to the discarded item.
+     */
 	void Push(Type* ptr)
 	{
 		ptr->~Type();
 		pool.push_back(ptr);
 	}
 
+	/**
+     * @brief Returns and removes an item from the back of the block.
+     * @return A pointer to the requested item.
+     */
 	Type* Pop()
 	{
 		Type* back = pool.back();
@@ -69,11 +92,19 @@ public:
 		return back;
 	}
 
+	/**
+     * @brief Returns a pointer to the beginning of the block.
+     * @return A pointer to the beginning of the block.
+     */
 	intptr_t PointerStart()
 	{
 		return start;
 	}
 
+	/**
+     * @brief Returns a pointer to the end of the block.
+     * @return A pointer to the end of the block.
+     */
 	intptr_t PointerEnd()
 	{
 		return end;
@@ -97,12 +128,20 @@ protected:
 	}
 
 public:
+	/**
+     * @brief De-allocates all the blocks in the pool.
+     */
 	~MemoryPoolImpl()
 	{
 		for(MemoryBlock<Type>* it : blocks)
 			delete it;
 	}
 
+	/**
+     * @brief Returns an item to the block from which it came.
+     * If, after the new item is added the block becomes completely unused, it is de-allocated.
+     * @param ptr A pointer to the object being discarded.
+     */
 	void Push(intptr_t ptr)
 	{
 		for(size_t i = 0; i < blocks.size(); i++)
@@ -125,6 +164,11 @@ public:
 		}
 	}
 
+	/**
+     * @brief Returns an item from the first non-empty block managed by the pool.
+     * If no empty blocks are found, a new block is created.
+     * @return A pointer to the requested object.
+     */
 	Type* Pop()
 	{
 		for(auto& block : blocks)
@@ -151,7 +195,14 @@ protected:
 	std::function<void(MemoryManagerImpl * sender, intptr_t ptr)> push;
 	size_t counter;
  
-public:       
+public:
+
+	/**
+     * @brief Creates a new pool that managed memory blocks of objects of a given Type.
+     * @tparam Type of the requested object pool.
+     * @param size_hint Optional hint to set the number of items per block.
+     * @return A memory manager object that manages the pool of objects of type Type.
+     */
 	template <typename Type>
 	static shared_ptr<MemoryManagerImpl> Create(size_t size_hint = 0)
 	{
@@ -173,12 +224,23 @@ public:
 	{
 	}
 
+	/**
+     * @brief Returns a single item back to the pool.
+     * If a block is unused, it is de-allocated.
+     * @param ptr A pointer to the object to be discarded.
+     */
 	void Push(intptr_t ptr)
 	{
 		push(this, ptr);
 		counter--;
 	}
 
+	/**
+     * @brief Pops a single item from the pool.
+     * If all blocks are used, creates a new block.
+     * @tparam Type of the requested object.
+     * @return The instance of the object popped from the pool.
+     */
 	template <typename Type>
 	Type* Pop()
 	{

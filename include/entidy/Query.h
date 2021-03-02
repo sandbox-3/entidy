@@ -30,6 +30,16 @@ protected:
 	}
 
 public:
+
+	/**
+     * @brief Executes the query and returns a view with lists of pointers to the selected components.
+     * @param filter Query string used to filter the entities.
+     * @return A View with lists of pointers to the requested components.
+     * @throw EntidyException if the filter string has a syntax error or is empty.
+     * @example Query String Examples:
+     * Velocity & Position & !Stationary
+     * ((Velocity & Position) & !(Flying | Swimming))
+     */
 	View Having(const string& filter)
 	{
 		return indexer->Fetch(select, filter);

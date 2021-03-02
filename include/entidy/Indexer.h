@@ -208,9 +208,9 @@ public:
 	}
 
 	/**
-     * @brief Performs a query and copies lists of pointers to the requested components.
+     * @brief Performs a query and returns view with lists of pointers to the requested components.
      * @param keys The ordered list of components requested. Empty list is allowed.
-     * @param filter A query string to filter by.
+     * @param filter Query string used to filter the entities.
      * @return A View with lists of pointers to the requested components.
      * @throw EntidyException if the filter string has a syntax error or is empty.
      */

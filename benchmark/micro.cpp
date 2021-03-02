@@ -196,7 +196,7 @@ TEST_CASE("Removing 100000 components from their entities")
 				registry->Emplace(entity, "CompInt", 0);
 			}
 			auto selector = registry->Select({"CompInt"});
-			selector.Having("CompInt").Each([&registry](entidy::Entity e, int x) { registry->Erase(e, "CompInt"); });
+			selector.Having("CompInt").Each([&registry](entidy::Entity e, int *x) { registry->Erase(e, "CompInt"); });
 		});
 	};
 }

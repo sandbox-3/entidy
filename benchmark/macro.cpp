@@ -42,7 +42,7 @@ template <typename T>
 class UniformRandom
 {
 public:
-	UniformRandom(long unsigned int seed = 42)
+	UniformRandom(unsigned int seed = 42)
 		: eng{seed}
 		, urd{0, 1}
 	{

@@ -15,7 +15,7 @@ set_target_properties(general
 )
 
 # SpaceInvaders
-if (UNIX)
+if (UNIX AND NOT APPLE)
     file(GLOB_RECURSE SPACE_INVADERS_CPP SpaceInvaders/src/*.cpp)
     add_executable(spaceinvaders ${SPACE_INVADERS_CPP})
     target_include_directories(spaceinvaders 
@@ -30,5 +30,5 @@ if (UNIX)
         CXX_EXTENSIONS NO
     )
 else()
-    message(WARNING "spaceinvaders is unix-like only!")
+    message(WARNING "spaceinvaders is linux only!")
 endif()

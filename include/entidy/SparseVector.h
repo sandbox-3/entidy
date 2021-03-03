@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cmath>
 #include <memory>
 #include <string>
@@ -7,21 +8,25 @@
 #include <entidy/Exception.h>
 #include <entidy/MemoryManager.h>
 
+#ifndef ENTIDY_DEFAULT_SV_SIZE
+#	define ENTIDY_DEFAULT_SV_SIZE 512
+#endif
+
 namespace entidy
 {
-#define DEFAULT_SV_SIZE 512
 
 using namespace std;
 
 template <size_t PageSize>
 class SparseVectorImpl;
+
 template <size_t PageSize>
 using SparseVector = shared_ptr<SparseVectorImpl<PageSize>>;
 
 template <size_t Size>
 struct Page
 {
-	intptr_t data[Size];
+	std::array<intptr_t, Size> data{};
 	size_t count = 0;
 };
 
@@ -31,7 +36,7 @@ class SparseVectorImpl
 protected:
 	vector<Page<PageSize>*> pages;
 	MemoryManager memory_manager;
-	size_t size = 0;
+	size_t size;
 
 	/**
      * @brief Returns a recycled or created page from the memory pool.
@@ -45,10 +50,11 @@ protected:
 	}
 
 public:
-	SparseVectorImpl(MemoryManager memory_manager)
-	{
-		this->memory_manager = memory_manager;
-	}
+	SparseVectorImpl(MemoryManager manager)
+		: memory_manager(manager)
+		, pages{}
+		, size{0}
+	{ }
 
 	/**
      * @brief Returns all the pages to the memory pool for recycling.
@@ -68,7 +74,7 @@ public:
      */
 	intptr_t Read(size_t index) const
 	{
-		size_t page_index = std::floor(index / PageSize);
+		size_t page_index = index / PageSize;
 		if(page_index >= pages.size())
 			return 0;
 		if(pages[page_index] == nullptr)
@@ -88,7 +94,7 @@ public:
 		if(value == 0)
 			return 0;
 
-		size_t page_index = std::floor(index / PageSize);
+		size_t page_index = index / PageSize;
 
 		while(page_index >= pages.size())
 			pages.push_back(nullptr);
@@ -116,7 +122,7 @@ public:
      */
 	intptr_t Erase(size_t index)
 	{
-		size_t page_index = std::floor(index / PageSize);
+		size_t page_index = index / PageSize;
 
 		if(page_index >= pages.size())
 			return 0;

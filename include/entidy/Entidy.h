@@ -24,9 +24,8 @@ protected:
 
 public:
 	Entidy()
-	{
-		indexer = make_shared<IndexerImpl>();
-	}
+		: indexer{make_shared<IndexerImpl>()}
+	{ }
 
 	~Entidy() { }
 

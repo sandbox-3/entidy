@@ -16,7 +16,7 @@ using namespace entidy;
 
 struct Vec3
 {
-	Vec3(int x, int y, int z)
+	Vec3(float x, float y, float z)
 	{
 		this->x = x;
 		this->y = y;
@@ -58,16 +58,13 @@ struct A
 
 int main()
 {
-    Entidy entidy;
-    Entity e = entidy.Create();
-    entidy.Emplace<Position>(e, "test1");
-    entidy.Emplace<Velocity>(e, "test2");
+	Entidy entidy;
+	Entity e = entidy.Create();
+	entidy.Emplace<Position>(e, "test1");
+	entidy.Emplace<Velocity>(e, "test2");
 
-    auto view = entidy.Select({"test1", "test2"}).Having("test1 & test2");
-    view.Each([&](Entity n, Position * pos, Velocity *vel)
-    {
-        cout << n << endl;
-    });
+	auto view = entidy.Select({"test1", "test2"}).Having("test1 & test2");
+	view.Each([&](Entity n, Position* pos, Velocity* vel) { cout << n << endl; });
 
 	return 0;
 }

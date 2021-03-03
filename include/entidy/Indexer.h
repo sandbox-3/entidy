@@ -12,19 +12,17 @@
 
 namespace entidy
 {
-
-using BitMap = Roaring;
-
 using namespace std;
 
+using BitMap = Roaring;
 using Entity = uint32_t;
 
 struct ComponentMap
 {
 	BitMap entities;
-	SparseVector<DEFAULT_SV_SIZE> components;
+	SparseVector<ENTIDY_DEFAULT_SV_SIZE> components;
 	MemoryManager mem_pool;
-	size_t type;
+	size_t type = 0;
 };
 
 class IndexerImpl;
@@ -64,7 +62,7 @@ protected:
 		{
 			c = componentRefCount++;
 			maps.emplace_back(ComponentMap());
-			maps.back().components = make_shared<SparseVectorImpl<DEFAULT_SV_SIZE>>(sv_mem_pool);
+			maps.back().components = make_shared<SparseVectorImpl<ENTIDY_DEFAULT_SV_SIZE>>(sv_mem_pool);
 			index.emplace(key, c);
 		}
 		return c;
@@ -87,9 +85,8 @@ protected:
 
 public:
 	IndexerImpl()
-	{
-		sv_mem_pool = MemoryManagerImpl::Create<Page<DEFAULT_SV_SIZE>>();
-	}
+		: sv_mem_pool{MemoryManagerImpl::Create<Page<ENTIDY_DEFAULT_SV_SIZE>>()}
+	{ }
 
 	/**
      * @brief Returns a new or recycled entity.
@@ -223,12 +220,12 @@ public:
 			throw(EntidyException("No filter set"));
 
 		query = qp.Parse(filter);
-		for(auto k : keys)
+		for(auto& k : keys)
 			query &= Evaluate(k);
 
-		vector<SparseVector<DEFAULT_SV_SIZE>> results;
+		vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>> results;
 		for(size_t k = 0; k < keys.size() + 1; k++)
-			results.push_back(make_shared<SparseVectorImpl<DEFAULT_SV_SIZE>>(sv_mem_pool));
+			results.push_back(make_shared<SparseVectorImpl<ENTIDY_DEFAULT_SV_SIZE>>(sv_mem_pool));
 
 		size_t i = 0;
 		auto it = query.begin();
@@ -246,7 +243,7 @@ public:
 			i = 0;
 			size_t c = ComponentIndex(keys[k]);
 
-			SparseVector<DEFAULT_SV_SIZE> sv = maps[c].components;
+			SparseVector<ENTIDY_DEFAULT_SV_SIZE> sv = maps[c].components;
 			types[k + 1] = maps[c].type;
 
 			it = query.begin();

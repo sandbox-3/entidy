@@ -19,7 +19,7 @@ public:
 	virtual Type Not(const Type& rhs) = 0;
 };
 
-enum TokenType
+enum class TokenType
 {
 	Nil,
 	And,
@@ -37,12 +37,17 @@ public:
 	TokenType op;
 	vector<Token> children;
 
-	Token() { }
+	Token()
+		: op(TokenType::Nil)
+		, key{}
+		, children{}
+	{ }
 
-	Token(const string& key)
-	{
-		op = Parse(key);
-	}
+	explicit Token(const string& key)
+		: op(Parse(key))
+		, key{}
+		, children{}
+	{ }
 
 	/**
      * @brief Translate a token string into its TokenType enum.
@@ -172,7 +177,7 @@ protected:
 		auto it = tokens.begin();
 		while(it < tokens.end() - 2)
 		{
-			auto prev = it;
+			auto& prev = it;
 			auto cur = it + 1;
 			auto next = it + 2;
 
@@ -210,7 +215,7 @@ protected:
 		auto it = tokens.begin();
 		while(it < tokens.end() - 1)
 		{
-			auto prev = it;
+			auto& prev = it;
 			auto cur = it + 1;
 
 			if(prev->op == TokenType::Not && cur->Valid() && !prev->Valid())
@@ -237,7 +242,7 @@ protected:
 		auto it = tokens.begin();
 		while(it < tokens.end() - 2)
 		{
-			auto prev = it;
+			auto& prev = it;
 			auto cur = it + 1;
 			auto next = it + 2;
 

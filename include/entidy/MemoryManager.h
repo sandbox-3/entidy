@@ -2,9 +2,9 @@
 
 #include <assert.h>
 #include <functional>
-#include <unordered_map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace entidy
@@ -31,17 +31,21 @@ protected:
 	MemoryBlock(size_t item_capacity)
 	{
 		this->item_capacity = item_capacity;
-        pool.resize(item_capacity);
+
+		pool.resize(item_capacity);
+
 		data = new std::aligned_storage_t<sizeof(Type), alignof(Type)>[item_capacity];
 
 		Type* pointer = reinterpret_cast<Type*>(data);
+
 		for(size_t i = 0; i < item_capacity; i++)
 		{
 			Type* ptr = pointer + i;
 			pool[i] = ptr;
 		}
-        start = (intptr_t)pool[0];
-        end = (intptr_t)pool.back();
+
+		start = (intptr_t)pool[0];
+		end = (intptr_t)pool.back();
 	}
 
 public:
@@ -50,7 +54,7 @@ public:
      */
 	~MemoryBlock()
 	{
-		delete []data;
+		delete[] data;
 	}
 
 	/**
@@ -110,7 +114,7 @@ public:
 		return end;
 	}
 
-    friend MemoryPoolImpl<Type>;
+	friend MemoryPoolImpl<Type>;
 };
 
 class MemoryManagerImpl;
@@ -122,10 +126,10 @@ protected:
 	vector<MemoryBlock<Type>*> blocks;
 	size_t item_capacity;
 
-	MemoryPoolImpl(size_t item_capacity)
-	{
-		this->item_capacity = item_capacity;
-	}
+	MemoryPoolImpl(size_t capacity)
+		: item_capacity(capacity)
+		, blocks{}
+	{ }
 
 public:
 	/**
@@ -153,12 +157,12 @@ public:
 			if(ptr >= range_start && ptr <= range_end)
 			{
 				block->Push((Type*)ptr);
-                if(block->Available() == block->Capacity() && blocks.size() > 1)
-                {
-                    delete block;
-                    blocks[i] = blocks.back();
-                    blocks.pop_back();
-                }
+				if(block->Available() == block->Capacity() && blocks.size() > 1)
+				{
+					delete block;
+					blocks[i] = blocks.back();
+					blocks.pop_back();
+				}
 				return;
 			}
 		}
@@ -182,7 +186,7 @@ public:
 		return new_block->Pop();
 	}
 
-    friend MemoryManagerImpl;
+	friend MemoryManagerImpl;
 };
 
 class MemoryManagerImpl;
@@ -192,11 +196,10 @@ class MemoryManagerImpl
 {
 protected:
 	shared_ptr<void> pool;
-	std::function<void(MemoryManagerImpl * sender, intptr_t ptr)> push;
-	size_t counter;
- 
-public:
+	std::function<void(MemoryManagerImpl* sender, intptr_t ptr)> push;
+	size_t counter = 0;
 
+public:
 	/**
      * @brief Creates a new pool that managed memory blocks of objects of a given Type.
      * @tparam Type of the requested object pool.
@@ -213,16 +216,14 @@ public:
 
 		shared_ptr<MemoryManagerImpl> managed_pool(new MemoryManagerImpl());
 		managed_pool->pool = shared_ptr<MemoryPoolImpl<Type>>(new MemoryPoolImpl<Type>(block_capacity));
-		managed_pool->push = [&](MemoryManagerImpl * sender, intptr_t ptr) {
+		managed_pool->push = [&](MemoryManagerImpl* sender, intptr_t ptr) {
 			MemoryPoolImpl<Type>* mp = static_cast<MemoryPoolImpl<Type>*>(sender->pool.get());
 			mp->Push(ptr);
 		};
-        return managed_pool;
+		return managed_pool;
 	}
 
-	~MemoryManagerImpl()
-	{
-	}
+	~MemoryManagerImpl() { }
 
 	/**
      * @brief Returns a single item back to the pool.

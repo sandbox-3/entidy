@@ -20,14 +20,13 @@ class IndexerImpl;
 class View
 {
 protected:
-	vector<SparseVector<DEFAULT_SV_SIZE>> data;
+	vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>> data;
 	vector<size_t> types;
 
-	View(const vector<SparseVector<DEFAULT_SV_SIZE>>& data, const vector<size_t>& types)
-	{
-		this->data = data;
-		this->types = types;
-	}
+	View(const vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>>& data_list, const vector<size_t>& type_list)
+		: data(data_list)
+		, types(type_list)
+	{ }
 
 public:
 	template <class Ld>
@@ -37,7 +36,7 @@ public:
 	template <class Ret, class Cls, class... Args>
 	struct lambda_type<Ret (Cls::*)(Args...) const>
 	{
-		vector<SparseVector<DEFAULT_SV_SIZE>> data;
+		vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>> data;
 		vector<size_t> types;
 
 		template <size_t Nmax, size_t N, typename Head, typename... Rest>

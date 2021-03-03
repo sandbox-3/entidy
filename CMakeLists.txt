@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(Entidy
 VERSION 0.1.0
+HOMEPAGE_URL "https://github.com/sandbox-3/entidy"
 LANGUAGES C CXX
 )
 
@@ -10,8 +11,13 @@ set(THIS_PROJECT_NS ${PROJECT_NAME})
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 
 message("*")
-message("* ${PROJECT_NAME} v${THIS_PROJECT_VERSION} (${CMAKE_BUILD_TYPE})")
+message("* ${PROJECT_NAME} v${PROJECT_VERSION} (${CMAKE_BUILD_TYPE})")
 message("*")
+
+
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "* Building inside the source tree is a bad idea.")
+endif()
 
 ## CMAKE Instructions ##########################################################
 

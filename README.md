@@ -76,7 +76,9 @@ existing code.
 As demonstrated in the example above, the system designer can create a sigle
 type representing *similar components* without having to re-write
 the types over and over; in our case `Vec3` was used to represent both
-`position` and `velocity`, which helps in reducing clutter.
+`position` and `velocity`, which helps reduce clutter.
+Likewise, it makes it possible to use primitive types and strings as components
+directly, without necessarily wrapping them in structs for identification.
 
 ### Dynamic Components
 
@@ -109,16 +111,16 @@ entity for deletion) and tags (e.g. mark an entity as `is_enemy`).
 ### Relationships and Hierarchies
 
 Let's suppose we want to model an ownership relationship where one entity
-own 1 or many other entities.
+owns 1 or many other entities.
 
-If we were to have C++ types as components, we would have to model the
+If we were to have C++ types as components, we would need to model the
 relationship inside the types themselves using composition: an owner entity
 would need to have a component with a vector of children entities, and children
 would need to reference their parent entitie(s) in their respective components.
 
 This approach poses 2 main problems:
 
-1. The overhead of bookkeeping and its maintenance on behalf of the developer,
+1. The overhead of book-keeping and its maintenance on behalf of the developer,
    which is the product of the redundancy in representing those relationships.
 2. At least 2 queries need to be performed in order to produce a view that
    gives us access to the needed components.
@@ -152,8 +154,8 @@ int main()
 
   auto lives_in_city_1 = "lives_in_" + std::to_string(city_1);
 
-  registry.Emplace<Peasant>(peasant_1, lives_in_city_1);
-  registry.Emplace<Peasant>(peasant_2, lives_in_city_1);
+  registry.Emplace<bool>(peasant_1, lives_in_city_1);
+  registry.Emplace<bool>(peasant_2, lives_in_city_1);
 
   auto view = registry.Select({"peasant"})
                       .Having("peasant & " + lives_in_city_1);

@@ -30,5 +30,5 @@ if (UNIX)
         CXX_EXTENSIONS NO
     )
 else()
-    message(WARNING "spaceinvaders is unix-only")
+    message(WARNING "spaceinvaders is unix-like only!")
 endif()

@@ -157,7 +157,7 @@ int main()
   registry.Emplace<bool>(peasant_1, lives_in_city_1);
   registry.Emplace<bool>(peasant_2, lives_in_city_1);
 
-  auto view = registry.Select({"peasant"})
+  auto view = registry.Select({})
                       .Having("peasant & " + lives_in_city_1);
 
   ...

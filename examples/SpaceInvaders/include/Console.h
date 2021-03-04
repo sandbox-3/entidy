@@ -76,14 +76,14 @@ public:
     ConsoleImpl()
     {
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-		buffer.resize(size.ws_row * size.ws_col);
+		buffer.resize((size_t)size.ws_row * (size_t)size.ws_col);
 		cout << "\033c" << flush;
     }
 
 	void Render()
 	{
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-		buffer.resize(size.ws_row * size.ws_col);
+		buffer.resize((size_t)size.ws_row * (size_t)size.ws_col);
 
 		for(ushort y = 0; y < size.ws_row; y++)
 		{

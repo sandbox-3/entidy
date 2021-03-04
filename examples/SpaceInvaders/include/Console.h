@@ -99,19 +99,19 @@ public:
 		cout << std::flush;
 	}
 
-	size_t Cols() const
+	ushort Cols() const
 	{
 		return size.ws_col;
 	}
 
-	size_t Rows() const
+	ushort Rows() const
 	{
 		return size.ws_row;
 	}
 
 	Pixel* At(ushort x, ushort y)
 	{
-		if(x >= size.ws_col || x < 0 || y >= size.ws_row || y < 0)
+		if(x >= size.ws_col || y >= size.ws_row)
 			return Get(0,0);
 		return Get(x, y);
 	}

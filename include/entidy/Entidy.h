@@ -62,7 +62,7 @@ public:
      * The new instance is allocated or recycled by the memory pool.
      * If the component key does not exist, it is created and a Type association is saved.
      * The provided component will be copied into the newly created component.
-     * WARNING: The provided component to copy must NOT contain non memory-managed heap-allocated data. 
+     * WARNING: The provided component must be copy-constructible. 
      * @tparam Type The component type.
      * @param entity The entity.
      * @param key The key for for the component to add.
@@ -74,8 +74,7 @@ public:
 	Type* Emplace(Entity entity, const string& key, const Type& component)
 	{
 		Type* c = indexer->CreateComponent<Type>(entity, key);
-		memcpy(c, &component, sizeof(Type));
-
+		new(c) Type(component);
 		return c;
 	}
 

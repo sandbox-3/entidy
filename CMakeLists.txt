@@ -28,9 +28,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 ## Project Options #############################################################
 
-option(ENTIDY_BUILD_EXAMPLES "Build the examples" ON)
-option(ENTIDY_BUILD_TESTS "Build the tests" OFF)
-option(ENTIDY_BUILD_BENCHMARK "Build the benchmarks" ON)
+option(ENTIDY_BUILD_EXAMPLES "Build the examples" OFF)
+option(ENTIDY_BUILD_BENCHMARK "Build the benchmarks" OFF)
 option(ENTIDY_BUILD_STATIC "Build a static library" ON)
 
 ## Includes ####################################################################
@@ -50,10 +49,6 @@ include(GenerateExportHeader)
 
 if(ENTIDY_BUILD_EXAMPLES)
   add_subdirectory(examples)
-endif()
-
-if(ENTIDY_BUILD_TESTS)
-  add_subdirectory(tests)
 endif()
 
 if(ENTIDY_BUILD_BENCHMARK)

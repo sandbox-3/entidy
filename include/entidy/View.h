@@ -20,10 +20,10 @@ class IndexerImpl;
 class View
 {
 protected:
-	vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>> data;
+	vector<vector<intptr_t>> data;
 	vector<size_t> types;
 
-	View(const vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>>& data_list, const vector<size_t>& type_list)
+	View(const vector<vector<intptr_t>>& data_list, const vector<size_t>& type_list)
 		: data(data_list)
 		, types(type_list)
 	{ }
@@ -36,20 +36,20 @@ public:
 	template <class Ret, class Cls, class... Args>
 	struct lambda_type<Ret (Cls::*)(Args...) const>
 	{
-		vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>> data;
+		vector<vector<intptr_t>> data;
 		vector<size_t> types;
 
 		template <size_t Nmax, size_t N, typename Head, typename... Rest>
 		constexpr std::tuple<Head, Rest...> GetIndirection(size_t index) const
 		{
 			if constexpr(N == 1)
-				return std::make_tuple(static_cast<Head>((typename std::decay<Head>::type)data[data.size() - N]->Read(index)));
+				return std::make_tuple(static_cast<Head>((typename std::decay<Head>::type)data[data.size() - N][index]));
 
 			else if constexpr(N == Nmax)
-				return std::tuple_cat(std::make_tuple(static_cast<Head>(data[0]->Read(index))), GetGenerator<Nmax, N - 1, Rest...>(index));
+				return std::tuple_cat(std::make_tuple(static_cast<Head>(data[0][index])), GetGenerator<Nmax, N - 1, Rest...>(index));
 
 			else
-				return std::tuple_cat(std::make_tuple(static_cast<Head>((typename std::decay<Head>::type)data[data.size() - N]->Read(index))), GetGenerator<Nmax, N - 1, Rest...>(index));
+				return std::tuple_cat(std::make_tuple(static_cast<Head>((typename std::decay<Head>::type)data[data.size() - N][index])), GetGenerator<Nmax, N - 1, Rest...>(index));
 		}
 
 		template <size_t Nmax, size_t N, typename... T>
@@ -103,7 +103,7 @@ public:
 	template <typename F>
 	void Each(F&& fn) const
 	{
-		if(data[0]->Size() == 0)
+		if(data[0].size() == 0)
 			return;
 
 		lambda_type<F> lt;
@@ -112,7 +112,7 @@ public:
 
 		lt.TypeCheck();
 
-		for(size_t index = 0; index < data[0]->Size(); index++)
+		for(size_t index = 0; index < data[0].size(); index++)
 		{
 			std::apply(fn, lt.Get(index));
 		}
@@ -124,7 +124,7 @@ public:
      */
 	size_t Size() const
 	{
-		return data[0]->Size();
+		return data[0].size();
 	}
 
 	/**
@@ -139,7 +139,7 @@ public:
 	{
 		if(typeid(Type*).hash_code() != types[Col + 1])
 			throw(EntidyException("Type mismatch for class " + string(typeid(Type).name())));
-		return reinterpret_cast<Type*>(data[Col + 1]->Read(row));
+		return reinterpret_cast<Type*>(data[Col + 1][row]);
 	}
 
 	/**
@@ -148,7 +148,7 @@ public:
      */
 	Entity At(size_t row)
 	{
-		return static_cast<Entity>(data[0]->Read(row));
+		return static_cast<Entity>(data[0][row]);
 	}
 
 	friend IndexerImpl;

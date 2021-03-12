@@ -223,16 +223,16 @@ public:
 		for(auto& k : keys)
 			query &= Evaluate(k);
 
-		vector<SparseVector<ENTIDY_DEFAULT_SV_SIZE>> results;
+        size_t total = query.cardinality();
+		vector<vector<intptr_t>> results(keys.size() + 1);
 		for(size_t k = 0; k < keys.size() + 1; k++)
-			results.push_back(make_shared<SparseVectorImpl<ENTIDY_DEFAULT_SV_SIZE>>(sv_mem_pool));
+			results[k].resize(total);
 
 		size_t i = 0;
 		auto it = query.begin();
 		while(it != query.end())
 		{
-			results[0]->Write(i, *it);
-			++i;
+			results[0][i++] = *it;
 			++it;
 		}
 
@@ -247,11 +247,9 @@ public:
 			types[k + 1] = maps[c].type;
 
 			it = query.begin();
-
 			while(it != query.end())
 			{
-				results[k + 1]->Write(i, sv->Read(*it));
-				++i;
+				results[k + 1][i++] = sv->Read(*it);
 				++it;
 			}
 		}

@@ -90,7 +90,9 @@ public:
 			auto e = registry->Create();
 			registry->Emplace<Comp<1>>(e, "Comp1");
 		}
+        registry->Commit();
 		t0.elapsed();
+
 		timer t1;
 		{
 			auto query = registry->Select({"Comp1"});
@@ -106,6 +108,7 @@ public:
 				if(proba(0.25))
 					registry->Emplace<Comp<5>>(e, "Comp5");
 			});
+            registry->Commit();
 		}
 		t1.elapsed();
 		timer t2;
@@ -120,6 +123,7 @@ public:
 				if(proba(0.25))
 					registry->Erase(e, "Comp3");
 			});
+            registry->Commit();
 		}
 		t2.elapsed();
 		timer t3;
@@ -132,6 +136,7 @@ public:
 				if(proba(0.25))
 					registry->Erase(e);
 			});
+            registry->Commit();
 		}
 		t3.elapsed();
 		timer t4;
@@ -143,6 +148,7 @@ public:
 				//if(RandProb(0.25))
 				registry->Erase(e);
 			});
+            registry->Commit();
 		}
 		t4.elapsed();
 	}
@@ -169,6 +175,7 @@ public:
 			if(proba(0.25))
 				registry->Emplace<Comp<7>>(e, "Comp7");
 		}
+        registry->Commit();
 
 		auto t0 = timer{};
 		auto query = registry->Select({"Comp1", "Comp3", "Comp5", "Comp7"});

@@ -61,7 +61,7 @@ protected:
 		else
 		{
 			c = componentRefCount++;
-			maps.emplace_back(ComponentMap());
+			maps.push_back(ComponentMap());
 			maps.back().components = make_shared<SparseVectorImpl<ENTIDY_DEFAULT_SV_SIZE>>(sv_mem_pool);
 			index.emplace(key, c);
 		}

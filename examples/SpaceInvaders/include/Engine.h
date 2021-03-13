@@ -115,7 +115,7 @@ public:
 		{
 			it->Init(shared_from_this());
 		}
-
+        registry->Commit();
 		auto future = std::async(std::launch::async, &EngineImpl::GetChar, this);
 
 		while(running)
@@ -130,6 +130,7 @@ public:
 			{
 				it->Update(shared_from_this());
 			}
+            registry->Commit();
 
 			console->Render();
 

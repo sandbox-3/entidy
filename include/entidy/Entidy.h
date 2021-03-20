@@ -82,6 +82,22 @@ public:
 	}
 
 	/**
+     * @brief Creates and indexes a typeless void component (used as a flag).
+     * If the component key does not exist, it is created.
+     * No memory pool is created.
+     * This action is executed during commit.
+     * @param entity The entity.
+     * @param key The key for for the component to add.
+     * @throw EntidyException if the key had been previously used for a different type.
+     */
+	void Emplace(Entity entity, const string& key)
+	{
+		ddl.push_back([=]() {
+			indexer->CreateVoidComponent(entity, key);
+		});
+	}
+
+	/**
      * @brief Removes an entity and deletes all its components.
      * Sends all the deleted components to the memory-manager for recycling.
      * This action is executed during commit.

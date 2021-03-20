@@ -170,6 +170,22 @@ public:
 	}
 
 	/**
+     * @brief Creates and indexes a typeless void component (used as a flag).
+     * No memory pool is created.
+     * If the component key does not exist, it is created.
+     * @param entity The entity.
+     * @param key The key for for the component to add.
+     * @throw EntidyException if the key had been previously used for a different type.
+     */
+	void CreateVoidComponent(Entity entity, const string& key)
+	{
+		size_t c = ComponentIndex(key);
+		if(maps[c].type != 0)
+			throw(EntidyException("Component Type mismatch for key " + key));
+		maps[c].entities.add(entity);
+	}
+
+	/**
      * @brief Deletes component with key 'key' for entity 'entity'.
      * Also sends the instance back to the memory-manager for recycling.
      * @param entity The entity.

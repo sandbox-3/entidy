@@ -62,10 +62,11 @@ int main()
 	Entity e = entidy.Create();
 	entidy.Emplace<Position>(e, "test1");
 	entidy.Emplace<Velocity>(e, "test2");
-
 	entidy.Emplace<Vec3>(e, "test3", 1,2,3);
+	entidy.Emplace(e, "flag");
     entidy.Commit();
-	auto view = entidy.Select({"test1", "test3"}).Having("test1 & test3");
+
+	auto view = entidy.Select({"test1", "test3"}).Having("test1 & test3 & flag");
 	view.Each([&](Entity n, Position* pos, Vec3* vel) { vel->print(); });
 
 	return 0;
